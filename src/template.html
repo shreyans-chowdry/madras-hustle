@@ -1,0 +1,248 @@
+<title>Madras Hustle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Barlow+Condensed:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: full-bleed 3D canvas; HUD pinned to screen corners like a dashboard; menus are painted shop-signboards over the city. */
+:root{
+  --ink:#15120d; --ink-2:#2a251c; --paper:#fbf3dc; --auto:#f6c21c; --auto-deep:#c99300;
+  --leaf:#1f7a4a; --kumkum:#d9402a; --sea:#6cc4ea; --route:#d24cff;
+  --hud-shadow:0 2px 0 rgba(0,0,0,.55);
+  --f-display:"Bungee","Arial Black",Impact,system-ui,sans-serif;
+  --f-body:"Barlow Condensed","Arial Narrow","Helvetica Neue",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-body);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block;background:var(--ink);outline:none;}
+.hud{position:fixed;inset:0;pointer-events:none;font-family:var(--f-body);}
+.hud[hidden]{display:none!important;}
+/* top-right status */
+#status{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right,0px));text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+#clock{font:700 20px/1 var(--f-body);letter-spacing:.06em;text-shadow:var(--hud-shadow);opacity:.9;}
+#cash{font:400 30px/1 var(--f-display);color:#8ee07a;text-shadow:0 2px 0 #0b2a07,0 0 1px #000;font-variant-numeric:tabular-nums;}
+#stars{font-size:30px;line-height:1;letter-spacing:2px;height:32px;}
+#stars span{color:rgba(255,255,255,.18);text-shadow:0 2px 0 rgba(0,0,0,.5);}
+#stars span.on{color:var(--paper);text-shadow:0 0 6px rgba(255,255,255,.5),0 2px 0 #000;}
+#stars.flash span.on{animation:flash .6s steps(2) infinite;}
+@keyframes flash{50%{color:rgba(255,255,255,.25)}}
+#bars{display:flex;gap:6px;align-items:center}
+.bar{width:150px;height:9px;background:rgba(0,0,0,.55);border:2px solid rgba(0,0,0,.6);}
+.bar i{display:block;height:100%;background:#66c35a;transition:width .2s;}
+#vbar i{background:var(--auto);}
+/* minimap */
+#mapwrap{position:absolute;left:max(18px,env(safe-area-inset-left,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));width:210px;height:210px;}
+#minimap{width:210px;height:210px;border-radius:50%;box-shadow:0 0 0 4px rgba(0,0,0,.55),0 6px 18px rgba(0,0,0,.4);background:#1d2328;}
+#compassN{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px;font:700 14px/20px var(--f-body);text-align:center;color:var(--auto);text-shadow:0 1px 0 #000;}
+/* location */
+#loc{position:absolute;right:max(22px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));text-align:right;transition:opacity .6s;}
+#loc .street{font:700 26px/1.05 var(--f-body);letter-spacing:.02em;text-shadow:var(--hud-shadow);}
+#loc .area{font:600 18px/1.1 var(--f-body);color:var(--auto);text-transform:uppercase;letter-spacing:.12em;text-shadow:var(--hud-shadow);}
+#speedo{position:absolute;left:calc(max(18px,env(safe-area-inset-left,0px)) + 230px);bottom:calc(26px + env(safe-area-inset-bottom,0px));font:400 34px/1 var(--f-display);text-shadow:var(--hud-shadow);font-variant-numeric:tabular-nums;}
+#speedo small{font:700 15px var(--f-body);letter-spacing:.1em;opacity:.8;margin-left:4px;}
+#vehname{font:600 16px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin-top:4px;}
+/* objective + prompts */
+#objective{position:absolute;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(680px,80vw);text-align:center;font:600 24px/1.25 var(--f-body);text-shadow:0 2px 0 #000,0 0 8px rgba(0,0,0,.7);}
+#objective b{color:var(--auto);font-weight:700;}
+#timer{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font:400 34px/1 var(--f-display);text-shadow:var(--hud-shadow);font-variant-numeric:tabular-nums;}
+#timer.low{color:var(--kumkum);}
+#prompt{position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:calc(16px + env(safe-area-inset-top,0px));max-width:340px;background:rgba(10,9,7,.78);padding:10px 14px;font:600 18px/1.3 var(--f-body);border-left:4px solid var(--auto);}
+#prompt kbd,.keys kbd{display:inline-block;min-width:1.4em;padding:0 .35em;margin:0 .1em;font:700 .85em/1.5 var(--f-body);text-align:center;color:var(--ink);background:var(--paper);border-radius:3px;box-shadow:0 2px 0 #8d846f;}
+#phone{position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:calc(90px + env(safe-area-inset-top,0px));width:300px;background:#f7f2e6;color:var(--ink);border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.45);transform:translateX(-120%);transition:transform .45s cubic-bezier(.2,.9,.3,1.2);}
+#phone.show{transform:none;}
+#phone .from{font:800 15px/1 var(--f-body);text-transform:uppercase;letter-spacing:.1em;color:var(--leaf);margin-bottom:6px;display:flex;justify-content:space-between;}
+#phone .msg{font:500 18px/1.3 var(--f-body);}
+/* big centre banners */
+#banner{position:absolute;left:0;right:0;top:34%;text-align:center;opacity:0;transition:opacity .4s;}
+#banner.show{opacity:1;}
+#banner .big{font:400 clamp(40px,8vw,88px)/1 var(--f-display);color:var(--auto);text-shadow:0 4px 0 #000,0 0 24px rgba(0,0,0,.6);-webkit-text-stroke:2px #000;}
+#banner.bad .big{color:var(--kumkum);}
+#banner .sub{margin-top:10px;font:700 26px/1.2 var(--f-body);text-shadow:0 2px 0 #000;}
+#toast{position:absolute;left:50%;top:22%;transform:translateX(-50%);font:700 24px var(--f-body);color:#8ee07a;text-shadow:0 2px 0 #000;opacity:0;transition:opacity .3s,transform .3s;}
+#toast.show{opacity:1;transform:translate(-50%,-8px);}
+/* overlays */
+.screen{position:fixed;inset:0;display:flex;align-items:flex-start;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px;background:linear-gradient(90deg,rgba(15,12,8,.92) 0%,rgba(15,12,8,.7) 46%,rgba(15,12,8,0) 80%);overflow:auto;}
+.screen[hidden]{display:none!important;}
+.card{max-width:640px;display:flex;flex-direction:column;gap:18px;margin-left:clamp(0px,5vw,72px);margin-block:auto;}
+.sign{background:var(--auto);color:var(--ink);padding:14px 18px 12px;box-shadow:6px 6px 0 var(--ink),6px 6px 0 2px var(--auto-deep);transform:rotate(-1.2deg);align-self:flex-start;}
+.sign .ta{font:700 18px/1 var(--f-body);letter-spacing:.06em;opacity:.8;}
+.sign h1{margin:2px 0 0;font:400 clamp(40px,7vw,72px)/.92 var(--f-display);letter-spacing:.01em;text-wrap:balance;}
+.tag{font:600 20px/1.35 var(--f-body);color:var(--paper);max-width:46ch;}
+.tag b{color:var(--auto);}
+.places{display:flex;flex-wrap:wrap;gap:6px;}
+.places span{font:700 14px/1 var(--f-body);letter-spacing:.12em;text-transform:uppercase;padding:6px 8px;border:1.5px solid rgba(251,243,220,.4);}
+.btnrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+button.go{pointer-events:auto;font:400 24px/1 var(--f-display);color:var(--ink);background:var(--paper);border:0;padding:14px 22px 12px;cursor:pointer;box-shadow:0 4px 0 var(--auto-deep);}
+button.go:hover{background:var(--auto);}
+button.go:focus-visible,button.ghost:focus-visible{outline:3px solid var(--sea);outline-offset:3px;}
+button.go:disabled{opacity:.5;cursor:progress;}
+button.ghost{font:700 18px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:transparent;border:2px solid rgba(251,243,220,.55);padding:11px 14px;cursor:pointer;}
+button.ghost:hover{border-color:var(--auto);color:var(--auto);}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font:600 17px/1.3 var(--f-body);}
+.keys dt{white-space:nowrap;}
+.keys dd{margin:0;opacity:.85;min-width:0;}
+.loadbar{height:6px;background:rgba(255,255,255,.15);width:min(360px,100%);}
+.loadbar i{display:block;height:100%;width:0;background:var(--auto);transition:width .2s;}
+#loadtext{font:600 16px var(--f-body);letter-spacing:.06em;opacity:.8;}
+.credit{font:500 14px/1.4 var(--f-body);opacity:.6;max-width:52ch;}
+.cols{display:flex;gap:28px;flex-wrap:wrap;}
+.cols > div{min-width:0;}
+h2{font:400 26px/1 var(--f-display);margin:0;color:var(--auto);}
+#bigmap{position:fixed;inset:0;background:rgba(12,14,16,.94);}
+#bigmap[hidden]{display:none!important;}
+#bigmapCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
+#bigmapInfo{position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:calc(16px + env(safe-area-inset-top,0px));font:600 18px/1.4 var(--f-body);background:rgba(10,9,7,.8);padding:10px 14px;pointer-events:none;border-left:4px solid var(--route);}
+#touchnote{font:600 16px var(--f-body);color:var(--kumkum);}
+@media (max-width:700px){
+  #mapwrap{width:140px;height:140px;} #minimap{width:140px;height:140px;}
+  #speedo{left:calc(max(18px,env(safe-area-inset-left,0px)) + 156px);font-size:26px;}
+  .bar{width:100px;} #loc .street{font-size:20px;} #objective{font-size:19px;}
+  #phone{width:240px;}
+}
+@media (prefers-reduced-motion:reduce){#phone,#banner,#toast{transition:none;}#stars.flash span.on{animation:none;}}
+
+#abar i{background:#5aa0ff;} #fbar i{background:#e8e2d0;}
+#cashDelta{font:700 20px/1 var(--f-body);opacity:0;transition:opacity .3s;font-variant-numeric:tabular-nums;}
+#cashDelta.up{color:#8ee07a;opacity:1;} #cashDelta.down{color:#ff6a5a;opacity:1;}
+#weapon{position:absolute;right:max(18px,env(safe-area-inset-right,0px));top:calc(190px + env(safe-area-inset-top,0px));text-align:right;font:600 18px/1.2 var(--f-body);text-shadow:var(--hud-shadow);}
+#weapon b{display:block;font:400 18px/1.2 var(--f-display);color:var(--auto);}
+#alt{position:absolute;left:calc(max(18px,env(safe-area-inset-left,0px)) + 230px);bottom:calc(92px + env(safe-area-inset-bottom,0px));font:700 18px var(--f-body);letter-spacing:.08em;text-shadow:var(--hud-shadow);}
+#hurt{position:fixed;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(180,0,0,.65) 100%);}
+#crosshair{position:fixed;left:50%;top:50%;width:26px;height:26px;margin:-13px;pointer-events:none;}
+#crosshair:before,#crosshair:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000;}
+#crosshair:before{left:12px;top:0;width:2px;height:26px;} #crosshair:after{top:12px;left:0;height:2px;width:26px;}
+#scope{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at center,rgba(0,0,0,0) 34vmin,#000 34.5vmin);}
+#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;}
+#fade.on{animation:fadeio .6s ease-out;}
+@keyframes fadeio{0%{opacity:1}100%{opacity:0}}
+#menu{position:fixed;left:max(24px,env(safe-area-inset-left,0px));top:calc(80px + env(safe-area-inset-top,0px));width:min(440px,calc(100vw - 48px));background:rgba(12,13,15,.92);border-top:6px solid var(--auto);box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:20;}
+#menu[hidden]{display:none!important;}
+#menuTitle{font:400 28px/1.1 var(--f-display);color:var(--auto);padding:16px 18px 2px;}
+#menuSub{font:600 16px/1.3 var(--f-body);opacity:.75;padding:0 18px 10px;}
+#menuList{display:flex;flex-direction:column;max-height:56vh;overflow:auto;}
+.mi{all:unset;display:flex;justify-content:space-between;gap:16px;padding:10px 18px;font:600 19px/1.2 var(--f-body);color:var(--paper);cursor:pointer;border-left:4px solid transparent;}
+.mi b{font-weight:700;color:#8ee07a;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.mi.sel{background:rgba(246,194,28,.16);border-left-color:var(--auto);}
+.mi.dis{opacity:.4;cursor:default;}
+#menuCash{padding:10px 18px 14px;font:700 16px var(--f-body);color:#8ee07a;border-top:1px solid rgba(255,255,255,.1);}
+#menuHelp{padding:0 18px 14px;font:600 14px var(--f-body);opacity:.6;}
+kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:10px;}
+#padHint{position:absolute;right:max(18px,env(safe-area-inset-right,0px));top:calc(240px + env(safe-area-inset-top,0px));font:600 14px var(--f-body);opacity:.6;}
+#bigmapCross{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px;border:2px solid #d24cff;border-radius:50%;pointer-events:none;}
+.ctl{display:grid;grid-template-columns:auto 1fr auto;gap:5px 12px;font:600 16px/1.3 var(--f-body);}
+.ctl .hd{font:700 13px var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--auto);grid-column:1/-1;margin-top:6px;}
+.ctl dd{margin:0;opacity:.85;min-width:0;}
+.g{color:#8ee07a;}
+</style>
+
+<canvas id="game" tabindex="0" aria-label="Madras Hustle game view"></canvas>
+
+<div class="hud" id="hud" hidden>
+  <div id="status">
+    <div id="clock">17:30</div>
+    <div id="cash">$0</div>
+    <div id="cashDelta"></div>
+    <div id="stars" aria-label="wanted level"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+    <div id="bars"><div class="bar" id="hbar" title="Health"><i style="width:100%"></i></div></div>
+    <div class="bar" id="abar" title="Armor" hidden><i style="width:0%"></i></div>
+    <div class="bar" id="vbar" title="Vehicle condition" hidden><i style="width:100%"></i></div>
+    <div class="bar" id="fbar" title="Fuel" hidden><i style="width:100%"></i></div>
+  </div>
+  <div id="mapwrap"><canvas id="minimap" width="420" height="420"></canvas></div>
+  <div id="speedo" hidden><span id="kmh">0</span><small>KM/H</small><div id="vehname"></div></div>
+  <div id="loc"><div class="street" id="street"></div><div class="area" id="area"></div></div>
+  <div id="timer" hidden></div>
+  <div id="objective"></div>
+  <div id="prompt" hidden></div>
+  <div id="phone"><div class="from"><span id="phoneFrom"></span><span>now</span></div><div class="msg" id="phoneMsg"></div></div>
+  <div id="banner"><div class="big" id="bannerBig"></div><div class="sub" id="bannerSub"></div></div>
+  <div id="toast"></div>
+  <div id="weapon" hidden></div>
+  <div id="alt" hidden></div>
+  <div id="crosshair" hidden></div>
+  <div id="padHint" hidden>Controller connected</div>
+</div>
+<div id="scope" hidden></div>
+<div id="hurt"></div>
+<div id="fade"></div>
+<div id="menu" hidden><div id="menuTitle"></div><div id="menuSub"></div><div id="menuList"></div><div id="menuCash"></div><div id="menuHelp">↑ ↓ choose · Enter / ✕ select · Esc / ○ back</div></div>
+
+<div class="screen" id="title">
+  <div class="card">
+    <div class="sign"><div class="ta">CHENNAI · 13°N 80°E</div><h1>Madras<br>Hustle</h1></div>
+    <p class="tag">An open-world crime game on <b>200 km² of real Chennai streets</b>. Rob stores, buy guns, cars, boats, jets and penthouses, fly from the airport, ride the trains, and stay one step ahead of the cops. Plays with keyboard and mouse or a <b>PS4 / PS5 controller</b>.</p>
+    <div class="places"><span>Egmore</span><span>Nungambakkam</span><span>Mount Road</span><span>T Nagar</span><span>Adyar</span><span>Marina</span><span>Airport</span><span>Port</span></div>
+    <div class="loadbar"><i id="loadfill"></i></div>
+    <div id="loadtext">Downloading the city map…</div>
+    <div class="btnrow"><button class="go" id="startBtn" disabled>Start</button><button class="ghost" id="controlsBtn">Controls</button></div>
+    <div id="touchnote" hidden>This game needs a keyboard or a game controller.</div>
+    <p class="credit">Streets, buildings, the Cooum and the coastline come from OpenStreetMap contributors (ODbL). Building heights are estimated where the map has none. All characters and businesses are invented.</p>
+  </div>
+</div>
+
+<div class="screen" id="pause" hidden>
+  <div class="card">
+    <div class="sign"><div class="ta">PAUSED</div><h1 style="font-size:52px">Paused</h1></div>
+    <div class="cols">
+      <dl class="ctl">
+        <dt class="hd">On foot</dt>
+        <dt><kbd>WASD</kbd></dt><dd>Move</dd><dt><kbd class="pad">L stick</kbd></dt>
+        <dt><kbd>Shift</kbd></dt><dd>Sprint</dd><dt><kbd class="pad">✕</kbd></dt>
+        <dt><kbd>Space</kbd></dt><dd>Jump</dd><dt><kbd class="pad">□</kbd></dt>
+        <dt><kbd>R-click</kbd></dt><dd>Aim</dd><dt><kbd class="pad">L2</kbd></dt>
+        <dt><kbd>Click</kbd></dt><dd>Shoot / punch</dd><dt><kbd class="pad">R2</kbd></dt>
+        <dt><kbd>Tab / X / 1-8</kbd></dt><dd>Switch weapon</dd><dt><kbd class="pad">R1 / L1</kbd></dt>
+        <dt><kbd>R</kbd></dt><dd>Reload</dd><dt><kbd class="pad">○</kbd></dt>
+        <dt><kbd>F</kbd></dt><dd>Enter / steal / exit vehicle, board train</dd><dt><kbd class="pad">△</kbd></dt>
+        <dt><kbd>E</kbd></dt><dd>Interact: shops, doors, missions, fuel</dd><dt><kbd class="pad">D-pad →</kbd></dt>
+        <dt class="hd">Driving and boats</dt>
+        <dt><kbd>W / S</kbd></dt><dd>Accelerate / brake and reverse</dd><dt><kbd class="pad">R2 / L2</kbd></dt>
+        <dt><kbd>A / D</kbd></dt><dd>Steer</dd><dt><kbd class="pad">L stick</kbd></dt>
+        <dt><kbd>Space</kbd></dt><dd>Handbrake</dd><dt><kbd class="pad">R1 / ✕</kbd></dt>
+        <dt><kbd>H</kbd></dt><dd>Horn</dd><dt><kbd class="pad">L3</kbd></dt>
+        <dt><kbd>V</kbd></dt><dd>Look behind</dd><dt><kbd class="pad">R3</kbd></dt>
+        <dt><kbd>R</kbd></dt><dd>Flip / reset car</dd><dt><kbd class="pad">○</kbd></dt>
+        <dt class="hd">Helicopter</dt>
+        <dt><kbd>W / S</kbd></dt><dd>Tilt forward / back</dd><dt><kbd class="pad">L stick ↕</kbd></dt>
+        <dt><kbd>A / D</kbd></dt><dd>Turn</dd><dt><kbd class="pad">L stick ↔</kbd></dt>
+        <dt><kbd>Space / Shift</kbd></dt><dd>Climb / descend</dd><dt><kbd class="pad">R2 / L2</kbd></dt>
+        <dt><kbd>Q / E</kbd></dt><dd>Strafe</dd><dt><kbd class="pad">L1 / R1</kbd></dt>
+        <dt class="hd">Planes</dt>
+        <dt><kbd>Space / Shift</kbd></dt><dd>Throttle up / down</dd><dt><kbd class="pad">R2 / L2</kbd></dt>
+        <dt><kbd>W / S</kbd></dt><dd>Nose down / up</dd><dt><kbd class="pad">L stick ↕</kbd></dt>
+        <dt><kbd>A / D</kbd></dt><dd>Roll and turn</dd><dt><kbd class="pad">L stick ↔</kbd></dt>
+        <dt><kbd>Q / E</kbd></dt><dd>Rudder</dd><dt><kbd class="pad">L1 / R1</kbd></dt>
+        <dt class="hd">Anywhere</dt>
+        <dt><kbd>Mouse</kbd></dt><dd>Look around</dd><dt><kbd class="pad">R stick</kbd></dt>
+        <dt><kbd>C</kbd></dt><dd>Camera distance</dd><dt><kbd class="pad">D-pad ←</kbd></dt>
+        <dt><kbd>M</kbd></dt><dd>Map: click to set a route</dd><dt><kbd class="pad">Touchpad</kbd></dt>
+        <dt><kbd>T</kbd></dt><dd>Taxi and auto rides</dd><dt><kbd class="pad">D-pad ↓</kbd></dt>
+        <dt><kbd>L</kbd></dt><dd>Daylight mode</dd><dt><kbd class="pad">D-pad ↑</kbd></dt>
+        <dt><kbd>P / Esc</kbd></dt><dd>Pause</dd><dt><kbd class="pad">Options</kbd></dt>
+      </dl>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <h2>Progress</h2>
+        <div id="progress" style="font:600 18px/1.5 var(--f-body)"></div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="go" id="resumeBtn">Resume</button>
+      <button class="ghost" id="qualityBtn">Graphics: High</button>
+      <button class="ghost" id="timeBtn">Time: Always day</button>
+      <button class="ghost" id="soundBtn">Sound: On</button>
+      <button class="ghost" id="saveBtn">Save game</button>
+    </div>
+    <div class="btnrow" id="resetRow">
+      <button class="ghost" id="resetBtn">Reset progress</button>
+      <span id="resetConfirm" hidden style="display:flex;gap:10px;align-items:center;font:600 17px var(--f-body)">Erase your save? <button class="ghost" id="resetYes">Erase</button><button class="ghost" id="resetNo">Keep</button></span>
+    </div>
+  </div>
+</div>
+
+<div id="bigmap" hidden>
+  <canvas id="bigmapCanvas"></canvas>
+  <div id="bigmapInfo">Click a street to set a route · scroll to zoom · drag to pan · M to close<br>Controller: left stick pans · R2/L2 zoom · ✕ sets route · ○ closes</div>
+  <div id="bigmapCross" hidden></div>
+</div>
