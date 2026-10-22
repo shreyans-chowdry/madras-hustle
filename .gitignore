@@ -4,3 +4,6 @@ data/world2.json
 node_modules/
 .DS_Store
 artifact.html
+tools/e2e/node_modules
+tools/e2e/out/
+__pycache__/

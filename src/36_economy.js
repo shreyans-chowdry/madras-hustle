@@ -252,6 +252,7 @@ function enterInterior(type, svc) {
   player.interior = { type, svc, ret: { x: player.x, z: player.z, h: player.h } };
   for (const k in INT) if (INT[k] && INT[k].g) INT[k].g.visible = k === type;
   player.x = I.spawn[0]; player.z = I.spawn[1] - 2.2; player.y = 0; player.h = Math.PI; camYaw = Math.PI; camPitch = 0.22; camSmoothed = false; player.vx = player.vz = 0;
+  if (svc && svc.at) { player.x = I.x + svc.at[0]; player.z = I.z + svc.at[1]; if (svc.atH !== undefined) { player.h = svc.atH; camYaw = svc.atH; } delete svc.at; }
   fadeFlash();
   if (interiorNPC) { interiorNPC.remove(); interiorNPC = null; }
   const clerk = I.spots.clerk || I.spots.teller || I.spots.desk;
@@ -260,12 +261,16 @@ function enterInterior(type, svc) {
   if (type === 'dealer') showDealerCars();
   if (type === 'hangar') showHangar();
   robbery = null;
+  if (I.onEnter) I.onEnter(svc);
+  EventBus.emit('interior:enter', { type, svc });
 }
 function exitInterior() {
   const it = player.interior; if (!it) return;
   for (const k in INT) if (INT[k] && INT[k].g) INT[k].g.visible = false;
   clearDisplayCars();
   if (interiorNPC) { interiorNPC.remove(); interiorNPC = null; }
+  if (INT[it.type].onExit) INT[it.type].onExit(it.svc);
+  EventBus.emit('interior:exit', { type: it.type, svc: it.svc });
   player.interior = null; player.x = it.ret.x; player.z = it.ret.z; player.h = it.ret.h + Math.PI; camYaw = player.h; camSmoothed = false; player.y = sidewalkY(player.x, player.z);
   fadeFlash();
   if (robbery && robbery.done) { crime('rob', player.x, player.z); }
@@ -275,6 +280,14 @@ function fadeFlash() { const f = $('fade'); f.classList.remove('on'); void f.off
 function interiorCollide() {
   const I = INT[player.interior.type]; const hw = I.W / 2 - 0.5, hd = I.D / 2 - 0.5;
   player.x = clamp(player.x, I.x - hw, I.x + hw); player.z = clamp(player.z, I.z - hd, I.z + hd);
+  // internal partitions (two-sided); a wall with open() returning true lets the player through (gates, turnstiles)
+  if (I.walls) for (const w of I.walls) {
+    if (w.open && w.open()) continue;
+    const ax = I.x + w[0], az = I.z + w[1], dx = w[2] - w[0], dz = w[3] - w[1], L2 = dx * dx + dz * dz;
+    let t = L2 ? ((player.x - ax) * dx + (player.z - az) * dz) / L2 : 0; t = clamp(t, 0, 1);
+    const cx = ax + dx * t, cz = az + dz * t, ex = player.x - cx, ez = player.z - cz, d = Math.hypot(ex, ez), R = 0.45;
+    if (d < R) { const nx = d > 1e-4 ? ex / d : -dz / Math.sqrt(L2), nz = d > 1e-4 ? ez / d : dx / Math.sqrt(L2); player.x = cx + nx * R; player.z = cz + nz * R; }
+  }
 }
 // display cars in garages / dealer
 const displayCars = [];
@@ -321,7 +334,17 @@ function serviceInteract(s) {
     case 'garage': if (!player.veh) enterInterior('garage', s); return;
     case 'marina': marinaMenu(s); return;
     case 'station': trainMenu(s); return;
+    default: if (SERVICE_HANDLERS[s.type]) SERVICE_HANDLERS[s.type](s); return;
   }
+}
+const SERVICE_HANDLERS = {};   // type -> fn(svc), registered by the transit / living-world modules
+// add an interior room far outside the city (same layout conventions as buildInteriors)
+let extraInteriorN = 0;
+function addInterior(type, W, D, H, build, floorMat, wallMat) {
+  const g = new THREE.Group(); g.position.set(IX0 + extraInteriorN * 160, 0, IZ0 - 600); extraInteriorN++;
+  room(g, W, D, H, floorMat, wallMat); scene.add(g); g.visible = false;
+  INT[type] = { g, W, D, H, x: g.position.x, z: g.position.z, spawn: [g.position.x, g.position.z + D / 2 - 1.5], spots: {}, walls: [] };
+  build(g, W, D, H, INT[type]); return INT[type];
 }
 function buyProperty(P) {
   if (!saveData.props.includes(P.id)) saveData.props.push(P.id);
@@ -397,6 +420,6 @@ function sprayShop(v) {
   if (!Police.flashing || Police.level === 0) { if (Police.level > 0) { Police.set(0); toast('New paint job. The cops lost you.'); } }
   else toast('Repaired. The cops saw you drive in.');
   const c = pick(v.spec.kind === 'car' ? CAR_COLS.concat(SUPER_COLS) : [0xffffff]); v.color = c;
-  if (v.kind === 'car') { const g = carBody(v.type, c); v.body.geometry = g.body; }
+  if (v.kind === 'car') { const g = carBody(v.type, c); v.body.geometry = g.body; if (v.model) v.attachModel(); }
   fadeFlash(); Sound.cash();
 }

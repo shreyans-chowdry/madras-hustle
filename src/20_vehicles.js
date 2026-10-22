@@ -259,9 +259,20 @@ class Vehicle {
       }
       lb(new THREE.MeshBasicMaterial({ color: 0xff2020 }), [-(sp.wid / 2), 2.2, 0.4, 0.15, 0.15, 0.15]); lb(new THREE.MeshBasicMaterial({ color: 0x20ff40 }), [sp.wid / 2, 2.2, 0.4, 0.15, 0.15, 0.15]);
     }
+    this.gearDown = true; this.lightsOn = false;
+    this.attachModel();
     this.group.position.set(x, 0, z); this.group.rotation.y = h;
     scene.add(this.group);
     vehicles.push(this);
+  }
+  // swap the procedural body for the Blender model when one exists for this type
+  attachModel() {
+    if (this.model) { this.group.remove(this.model.root); this.model = null; }
+    const mdl = Assets.vehicleModel(this.type, this.color); if (!mdl) return;
+    this.model = mdl; this.group.add(mdl.root);
+    this.body.visible = false; if (this.glassMesh) this.glassMesh.visible = false;
+    if (mdl.rotor) { if (this.blades) this.blades.visible = false; this.blades = mdl.rotor; }
+    if (mdl.prop) { if (this.prop) this.prop.visible = false; this.prop = mdl.prop; }
   }
   get speed() { return Math.hypot(this.vx, this.vz); }
   get fwdSpeed() { return this.vx * Math.sin(this.h) + this.vz * Math.cos(this.h); }
@@ -391,15 +402,18 @@ class Vehicle {
     if (this.fuel <= 0 && this.driver === 'player') this.thr = 0;
     const g0 = groundHeightAt(this.x, this.z, this.y + 1), onG = this.y <= g0 + 0.05;
     let spd = Math.hypot(this.vx, this.vz, this.vy);
-    const acc = this.thr * (sp.max * 0.32) - spd * spd * (0.32 / sp.max) * 0.55 - (onG ? (c.brake > 0.3 ? 12 : 0.8) : 0);
+    const drag = this.gearDown ? 0.55 : 0.42;   // retracting the gear cleans up the airframe
+    const acc = this.thr * (sp.max * 0.32) - spd * spd * (0.32 / sp.max) * drag - (onG ? (c.brake > 0.3 ? 12 : 0.8) : 0);
     spd = Math.max(0, spd + (acc - Math.sin(this.pitch) * 9.8) * dt);
     if (onG) {
       this.roll += (0 - this.roll) * dt * 5;
       if (spd > sp.rot && c.pitch < -0.1) this.pitch += -c.pitch * 0.5 * dt; else this.pitch += (0 - this.pitch) * dt * 4;
       this.h -= c.roll * 0.6 * dt * clamp(spd / 10, 0, 1) + c.yaw * 0.4 * dt;
     } else {
-      this.roll = clamp(this.roll + c.roll * 1.6 * dt, -1.2, 1.2); if (Math.abs(c.roll) < 0.1) this.roll *= Math.exp(-1.0 * dt);
+      this.roll = clamp(this.roll + c.roll * 1.6 * dt, -1.2, 1.2); if (Math.abs(c.roll) < 0.1) this.roll *= Math.exp(-(this.driver === 'player' ? 1.6 : 1.0) * dt);
       this.pitch = clamp(this.pitch - c.pitch * 1.0 * dt, -0.9, 0.9);
+      // arcade assist: hands-off flight trims toward a gentle climb instead of drifting into the ground
+      if (this.driver === 'player' && Math.abs(c.pitch) < 0.1 && spd > sp.stall) this.pitch += (0.03 - this.pitch) * dt * 0.5;
       const stall = spd < sp.stall;
       if (stall) this.pitch += (-0.5 - this.pitch) * dt * 0.8;
       this.h -= (Math.tan(this.roll) * 9.8 / Math.max(spd, 20)) * dt + c.yaw * 0.3 * dt;
@@ -423,6 +437,11 @@ class Vehicle {
     this.x = clamp(nx, BX0 - 400, BX1 + 1400); this.z = clamp(nz, BZ0 - 400, BZ1 + 400);
     if (ny <= g) {
       const vy = this.vy, sp = Math.hypot(this.vx, this.vz);
+      if (this.kind === 'plane' && !this.gearDown && sp > 4) {   // belly landing: scrape, sparks, damage
+        this.damage(sp * 6 * dt * 60 / 60 + 4); if (Math.random() < 0.5) Fx.spark(this.x, this.y + 0.3, this.z);
+        this.vx *= Math.exp(-1.5 * dt); this.vz *= Math.exp(-1.5 * dt);
+        if (this.driver === 'player' && !this._bellyWarned) { this._bellyWarned = true; toast('Gear up! Belly landing'); }
+      }
       if (vy < -7 || (this.kind === 'plane' && (Math.abs(this.roll) > 0.5 || this.pitch < -0.25) && sp > 15) || (this.kind === 'heli' && sp > 20)) return this.crashAir(Math.max(-vy, sp));
       this.y = g; this.vy = Math.max(0, this.vy);
       if (inWater(this.x, this.z) && g <= 0.05) { this.sinkT = 0.001; if (this.driver === 'player') onPlayerVehicleSink(this); }
@@ -463,6 +482,12 @@ class Vehicle {
       g.rotation.set(0, 0, 0); g.rotation.order = 'YXZ'; g.rotation.y = this.h; g.rotation.x = -this.pitch; g.rotation.z = this.roll;
     }
     this.tailMat.color.setHex(this.braking ? 0xff2a2a : (uNight.value > 0.3 ? 0xaa1a1a : 0x5a0f0f));
+    if (this.model) {
+      if (this.model.gear) this.model.gear.visible = this.gearDown;
+      const lit = this.lightsOn || (uNight.value > 0.3 && !!this.driver);
+      for (const m of this.model.head) m.emissiveIntensity = lit ? 6 : 0.4;
+      for (const m of this.model.tail) m.emissiveIntensity = this.braking ? 6 : lit ? 2 : 0.5;
+    }
     if (this.lbR) {
       const on = this.siren && (Math.floor(performance.now() / 140) % 2 === 0);
       this.lbR.color.setHex(this.siren ? (on ? 0xff2020 : 0x441111) : 0x551111);
@@ -485,6 +510,7 @@ class Vehicle {
   setWreck() {
     this.wreck = true; this.burnT = -1; this.health = 0; this.siren = false;
     this.body.material = WRECK_MAT; if (this.glassMesh) this.glassMesh.material = WRECK_MAT;
+    if (this.model) this.model.root.traverse(o => { if (o.isMesh) o.material = WRECK_MAT; });
     if (this.kind === 'car') { this.vx *= 0.3; this.vz *= 0.3; }
     if (this.driverMesh) this.driverMesh.visible = false;
   }
@@ -621,9 +647,11 @@ const trains = [], railLines = [];
 class Train {
   constructor(line, s, dir, ncoach = 6) {
     this.line = line; this.s = s; this.dir = dir; this.speed = 0; this.n = ncoach; this.coaches = []; this.stopT = 0; this.nextStop = null; this.passenger = false;
+    this.doors = []; this.doorOpen = 0;
     for (let i = 0; i < ncoach; i++) {
-      const g = coachGeo(i === 0 || i === ncoach - 1); const grp = new THREE.Group();
-      const b = new THREE.Mesh(g.body, TRAIN_MAT); b.castShadow = true; grp.add(b); grp.add(new THREE.Mesh(g.glass, GLASS));
+      const front = i === 0 || i === ncoach - 1, grp = new THREE.Group(), mdl = Assets.coach(front);
+      if (mdl) { grp.add(mdl.root); this.doors.push(...mdl.doors); }
+      else { const g = coachGeo(front); const b = new THREE.Mesh(g.body, TRAIN_MAT); b.castShadow = true; grp.add(b); grp.add(new THREE.Mesh(g.glass, GLASS)); }
       if (i === ncoach - 1) grp.children.forEach(m => m.rotation.y = Math.PI);
       scene.add(grp); this.coaches.push(grp);
     }
@@ -636,7 +664,7 @@ class Train {
     for (const s of st) { const d = (s - this.s) * this.dir; if (d > 25 && d < best) { best = d; this.nextStop = s; } }
   }
   update(dt) {
-    const L = this.line, maxV = 22;
+    const L = this.line, maxV = this.fast ? 40 : 22;
     if (this.stopT > 0) { this.stopT -= dt; this.speed = 0; if (this.stopT <= 0) this.pickNextStop(); }
     else {
       let target = maxV;
@@ -648,10 +676,19 @@ class Train {
       this.speed += clamp(target - this.speed, -1.6 * dt, 0.7 * dt);
       if (stopD < 1.5 && this.speed < 0.6) {
         this.speed = 0;
-        if (toEnd < 2) { this.dir = -this.dir; this.stopT = 18; } else this.stopT = 14;
+        if (toEnd < 2) { this.dir = -this.dir; this.stopT = this.dwell = this.fast ? 8 : 18; } else this.stopT = this.dwell = this.fast ? 7 : 14;
+        EventBus.emit('train:arrive', { train: this, s: this.s });
       }
     }
     this.s += this.speed * this.dir * dt;
+    // sliding doors: open after the train settles at a stop, close a few seconds before it departs
+    const wantOpen = this.stopT > 3 && this.stopT < (this.dwell || 14) - 1.5 ? 1 : 0;
+    const prevOpen = this.doorOpen; this.doorOpen = clamp(this.doorOpen + (wantOpen ? 1 : -1) * dt * 0.9, 0, 1);
+    if (prevOpen !== this.doorOpen) {
+      for (const d of this.doors) { const sgn = /\d$/.test(d.name) && d.name.endsWith('0') ? -1 : 1; d.position.z = d.userData.z0 + sgn * this.doorOpen * 0.68; }
+      if (prevOpen === 0 && this.doorOpen > 0) EventBus.emit('train:doors', { train: this, open: true });
+      if (prevOpen > 0 && this.doorOpen === 0) EventBus.emit('train:doors', { train: this, open: false });
+    }
     this.hornT -= dt; if (this.hornT < 0) { this.hornT = 20 + Math.random() * 30; if (dist2(this.x || 0, this.z || 0, camera.position.x, camera.position.z) < 300 * 300) Sound.trainHorn(0.06); }
     // place coaches
     for (let i = 0; i < this.n; i++) {
@@ -681,6 +718,7 @@ class Train {
     }
   }
 }
+Train.prototype.remove = function () { for (const c of this.coaches) scene.remove(c); const i = trains.indexOf(this); if (i >= 0) trains.splice(i, 1); this.dead = true; };
 const _rp = { x: 0, y: 0, z: 0 };
 function railPoint(L, s, out = { x: 0, y: 0, z: 0 }) {
   s = clamp(s, 0, L.len); const cum = L.cum; let lo = 0, hi = cum.length - 1;

@@ -100,6 +100,39 @@ const STEP = {
       st._left -= dt; return st._left <= 0;
     },
   },
+  // event-driven checkpoint: completes when a system raises the named EventBus event (optionally filtered)
+  event: {
+    start(st, M) { st._got = !!(st.pre && st.pre(M)); if (st._off) st._off(); st._off = EventBus.on(st.name, d => { if (!st.match || st.match(d, M)) st._got = true; }); return false; },
+    text: (st, M) => typeof st.text === 'function' ? st.text(M) : st.text,
+    update(st) { return st._got; },
+    target(st, M) { return st.target ? st.target(M) : null; },
+    cleanup(st) { if (st._off) { st._off(); st._off = null; } },
+  },
+  // land a fixed-wing aircraft inside a landing zone and come to a stop
+  landPlane: {
+    text: (st, M) => !player.veh || player.veh.kind !== 'plane' ? 'Get back in the <b>plane</b>' : st.text,
+    update(st, M) {
+      const t = st._t || (st._t = st.to(M)); placeMarker(objMarker, t[0], t[1], st.r * 0.3, 60, 0);
+      const v = player.veh; if (!v || v.kind !== 'plane' || v.wreck) return false;
+      M.extraBlips = [{ x: t[0], z: t[1], col: '#f6c21c', r: 8, edge: true }];
+      return Math.hypot(v.x - t[0], v.z - t[1]) < st.r && groundedPlane(v) && v.speed < 6;
+    },
+    target(st, M) { return st._t || (st._t = st.to(M)); },
+  },
+  // collect an object placed inside an interior (e.g. a drop on a station platform)
+  pickupIn: {
+    start(st, M) { st._got = false; return false; },
+    text: (st, M) => st.text,
+    update(st, M) {
+      const I = INT[st.interior]; if (!I || !player.interior || player.interior.type !== st.interior || (st.where && !st.where(M))) { if (st._m) st._m.visible = false; return false; }
+      if (!st._m) { st._m = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 0.2), new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.4, metalness: 0.3, emissive: 0x2a1a00 })); scene.add(st._m); }
+      const x = I.x + st.at[0], z = I.z + st.at[1]; st._m.visible = true; st._m.position.set(x, 0.75 + Math.sin(performance.now() / 300) * 0.05, z); st._m.rotation.y += 0.02;
+      placeMarker(objMarker, x, z, 0.9, 3, 0);
+      if (Math.hypot(player.x - x, player.z - z) < 1.6) { Sound.pickup(); st._m.visible = false; EventBus.emit('mission:pickup', { id: st.id }); return true; }
+      return false;
+    },
+    cleanup(st) { if (st._m) { scene.remove(st._m); st._m = null; } },
+  },
   runwayRace: {
     start(st, M) {
       const rw = mainRunway(); const a = edgePoint(rw.E, 60, 1, {}); const b = edgePoint(rw.E, rw.len - 80, 1, {});
@@ -245,13 +278,35 @@ function defineMissions() {
       { t: 'lose' },
     ]
   });
+  defineTransitMissions(near, hd);
   for (const m of MISSIONS) { m.marker = makeMarker(); m.label = labelSprite(m.title.toUpperCase(), m.who); m.label.visible = false; const f = freeSpot(m.at[0], m.at[1]); m.pos = f; }
 }
-function startMission(m) {
-  mission = { def: m, si: -1, timer: null, target: null, targets: [], extraBlips: null };
-  banner(m.title.toUpperCase(), 'Mission from ' + m.who, false, 2.6); Sound.pass();
-  if (rideJob.active) endRideJob();
-  nextStep();
+// ---------------- mission framework: Trigger -> Briefing -> Checkpoints -> Fail / Success -> Reward ----------------
+const CP_SKIP = new Set(['phone', 'give', 'wanted', 'spawn']);
+const CP_DEFAULT = { lose: 'Lose the cops', buyGun: 'Buy a gun', rob: 'Rob the store', hold: 'Hold the vault', destroy: 'Destroy the targets', rings: 'Fly through the rings', keepSpeed: 'Keep the bus moving', runwayRace: 'Win the runway race', stayNear: 'Stay close', collect: 'Collect the crates' };
+const MissionFW = {
+  label(st) { if (st.label) return st.label; const t = typeof st.text === 'function' ? '' : (st.text || ''); return t ? t.replace(/<[^>]+>/g, '').replace(/ Press F.*$/, '') : (CP_DEFAULT[st.t] || st.t); },
+  checkpoints(def) { return def.steps.filter(st => !CP_SKIP.has(st.t)).map(st => this.label(st)); },
+  checkpointIndex(M) { let n = 0; for (let i = 0; i < M.si && i < M.def.steps.length; i++) if (!CP_SKIP.has(M.def.steps[i].t)) n++; return n; },
+  // the briefing text defaults to the contact's first phone message
+  brief(def) { if (def.brief) return def.brief; const ph = def.steps.find(st => st.t === 'phone'); return ph ? ph.msg : ''; },
+};
+function startMission(m, skipBrief = false, via = null) {
+  if (mission) return;
+  m.brief = MissionFW.brief(m);
+  const begin = () => {
+    if (mission) return;
+    mission = { def: m, si: -1, timer: null, target: null, targets: [], extraBlips: null, t0: performance.now(), via };
+    banner(m.title.toUpperCase(), 'Mission from ' + m.who, false, 2.6); Sound.pass();
+    if (rideJob.active) endRideJob();
+    EventBus.emit('mission:start', { id: m.id });
+    nextStep();
+  };
+  if (skipBrief || !gameState || gameState !== 'play') begin(); else UI.showBriefing(m, begin, () => { m._declinedAt = performance.now(); toast('Mission declined'); });
+}
+// event-triggered missions (e.g. accepting a favour in dialogue) start themselves
+function missionTriggers() {
+  for (const m of MISSIONS) if (m.trigger && m.trigger.event) EventBus.on(m.trigger.event, () => { if (!mission && m.unlock(saveData.done) && !saveData.done.includes(m.id)) startMission(m, true, m.trigger.event); });
 }
 function nextStep() {
   const M_ = mission; if (!M_) return;
@@ -259,6 +314,7 @@ function nextStep() {
   M_.si++; M_.extraBlips = null; objMarker.visible = false; ringMesh.visible = false;
   if (M_.si >= M_.def.steps.length) return passMission();
   const st = M_.def.steps[M_.si]; st._t = null;
+  if (!CP_SKIP.has(st.t)) EventBus.emit('mission:checkpoint', { id: M_.def.id, index: MissionFW.checkpointIndex(M_), label: MissionFW.label(st) });
   if (st.timer) M_.timer = st.timer; else if (!st.keepTimer && !['phone', 'give', 'wanted', 'spawn'].includes(st.t)) M_.timer = null;
   const h = STEP[st.t]; const done = h.start ? h.start(st, M_) : false;
   if (done) nextStep();
@@ -276,13 +332,14 @@ function updateMission(dt) {
       m.label.position.set(m.pos[0], 7 + Math.sin(performance.now() / 500) * 0.3, m.pos[1]);
       if (Math.hypot(player.x - m.pos[0], player.z - m.pos[1]) < 3.5 && !player.dead && !player.veh) near = m;
     }
-    if (near) { prompt(`${key('E', '→')} Start <b>${near.title}</b>`); if (In.act('interact')) startMission(near); }
+    if (near) { prompt(`${key('E', '→')} Start <b>${near.title}</b>`); if (In.act('interact') && !(near._declinedAt && performance.now() - near._declinedAt < 800)) startMission(near); }
     return;
   }
   MISSIONS.forEach(m => { m.marker.visible = false; m.label.visible = false; });
   const M_ = mission, st = M_.def.steps[M_.si]; if (!st) return;
   if (M_.timer !== null) { M_.timer -= dt; if (M_.timer <= 0) return failMission('Out of time.'); }
-  if (M_.target && (M_.target.wreck || M_.target.dead) && !['destroy'].includes(st.t) && M_.si < M_.def.steps.length && ['enter', 'goto', 'land', 'runwayRace', 'collect', 'rings'].includes(st.t) && st.need !== 'any') return failMission('The ' + M_.target.spec.name.toLowerCase() + ' was destroyed.');
+  if (M_.target && (M_.target.wreck || M_.target.dead) && !['destroy'].includes(st.t) && M_.si < M_.def.steps.length && ['enter', 'goto', 'land', 'landPlane', 'runwayRace', 'collect', 'rings'].includes(st.t) && st.need !== 'any') return failMission('The ' + M_.target.spec.name.toLowerCase() + ' was destroyed.');
+  if (M_.def.fail) for (const f of M_.def.fail) if (f.when(M_)) return failMission(f.reason);
   const h = STEP[st.t];
   objMarker.visible = false;
   let done = h.update ? h.update(st, M_, dt) : true;
@@ -295,7 +352,11 @@ function passMission() {
   const m = mission.def;
   for (const v of [mission.target, mission.ship, mission.rival, ...(mission.targets || [])]) if (v && !v.dead) { v.mission = false; if (v !== player.veh) v.persist = false; }
   payBank(m.reward); Sound.pass(); rumble(0.4, 0.6, 400);
-  banner('MISSION PASSED', '+' + money(m.reward) + ' to your bank', false, 4.5);
+  if (m.rel) Dialogue.addRel(m.rel[0], m.rel[1]);
+  const secs = Math.round((performance.now() - (mission.t0 || performance.now())) / 1000);
+  banner('MISSION PASSED', '+' + money(m.reward) + ' to your bank' + (m.rel ? ` · ${(Dialogue.data.contacts[m.rel[0]] || { name: m.rel[0] }).name} ♥ +${m.rel[1]}` : '') + ` · ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`, false, 5);
+  for (const st of m.steps) if (STEP[st.t] && STEP[st.t].cleanup) STEP[st.t].cleanup(st);
+  EventBus.emit('mission:passed', { id: m.id, reward: m.reward, secs });
   if (!saveData.done.includes(m.id)) saveData.done.push(m.id);
   const unlocked = MISSIONS.filter(x => !saveData.done.includes(x.id) && x.unlock(saveData.done) && !x._announced);
   unlocked.forEach((x, i) => { x._announced = true; setTimeout(() => phone(x.who, `I have a job for you: "${x.title}". Find my marker on the map.`, 8), 5000 + i * 9000); });
@@ -308,6 +369,8 @@ function failMission(reason, silent = false) {
   const st = mission.def.steps[mission.si]; if (st && STEP[st.t] && STEP[st.t].cleanup) STEP[st.t].cleanup(st);
   for (const v of [mission.target, mission.ship, mission.rival, ...(mission.targets || [])]) if (v && !v.dead) { v.mission = false; if (v !== player.veh) { v.persist = false; } }
   if (!silent) { banner('MISSION FAILED', reason, true, 3.5); Sound.fail(); }
+  for (const s2 of mission.def.steps) if (STEP[s2.t] && STEP[s2.t].cleanup) STEP[s2.t].cleanup(s2);
+  EventBus.emit('mission:failed', { id: mission.def.id, reason });
   mission = null; objMarker.visible = false; nextMarker.visible = false; ringMesh.visible = false; setObjective(''); hud.timer.hidden = true;
 }
 function onVehicleDestroyed(v) { }

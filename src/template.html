@@ -135,6 +135,47 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
 .ctl .hd{font:700 13px var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--auto);grid-column:1/-1;margin-top:6px;}
 .ctl dd{margin:0;opacity:.85;min-width:0;}
 .g{color:#8ee07a;}
+
+/* ---------- overhaul: tracker, briefing, dialogue, flight HUD, console, panels ---------- */
+#gear{display:inline-block;margin-left:10px;font:400 22px/1 var(--f-display);color:var(--auto);}
+#tracker{position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:calc(120px + env(safe-area-inset-top,0px));width:min(320px,70vw);background:linear-gradient(90deg,rgba(10,9,7,.82),rgba(10,9,7,.35));border-left:4px solid var(--auto);padding:10px 14px;}
+#tracker[hidden]{display:none!important;}
+#tracker h3{margin:0 0 6px;font:400 18px/1.1 var(--f-display);color:var(--auto);letter-spacing:.02em;}
+#tracker ol{margin:0;padding:0;list-style:none;font:600 16px/1.35 var(--f-body);}
+#tracker li{display:flex;gap:8px;opacity:.55;} #tracker li.cur{opacity:1;color:var(--paper);} #tracker li.done{opacity:.5;text-decoration:line-through;}
+#tracker li:before{content:"○";color:var(--auto);} #tracker li.done:before{content:"✓";color:#8ee07a;} #tracker li.cur:before{content:"►";}
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,8,10,.55);z-index:30;padding:16px;}
+.modal[hidden]{display:none!important;}
+.panel{width:min(560px,100%);max-height:88vh;overflow:auto;background:rgba(14,15,18,.96);border-top:6px solid var(--auto);box-shadow:0 20px 60px rgba(0,0,0,.6);padding:20px 22px;}
+.panel h2{font:400 clamp(26px,5vw,38px)/1 var(--f-display);margin:0 0 4px;}
+.panel .who{font:700 15px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:#9fb0c0;}
+.panel p{font:500 18px/1.4 var(--f-body);margin:12px 0;}
+.panel ol{font:600 17px/1.5 var(--f-body);padding-left:22px;margin:8px 0 14px;}
+.panel .reward{font:700 18px var(--f-body);color:#8ee07a;}
+.panel .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+.set{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;font:600 18px var(--f-body);}
+.set button{min-width:150px;}
+.set input[type=range]{width:150px;accent-color:var(--auto);}
+.mlist{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.mlist div{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 10px;background:rgba(255,255,255,.04);border-left:4px solid #555;font:600 17px var(--f-body);}
+.mlist div.av{border-left-color:var(--auto);} .mlist div.dn{border-left-color:#5ac85a;opacity:.75;} .mlist div.lk{opacity:.45;}
+.mlist small{grid-column:1/-1;font:500 14px var(--f-body);opacity:.75;}
+#dialogue{position:absolute;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(640px,92vw);background:rgba(12,13,15,.92);border-left:5px solid var(--leaf);padding:12px 16px;pointer-events:auto;}
+#dialogue[hidden]{display:none!important;}
+#dlgWho{font:800 15px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:#7fd39a;}
+#dlgText{font:500 20px/1.35 var(--f-body);margin:4px 0 8px;}
+#dlgChoices{display:flex;flex-direction:column;gap:4px;}
+#dlgChoices button{all:unset;cursor:pointer;font:600 18px var(--f-body);padding:4px 8px;border-left:3px solid transparent;}
+#dlgChoices button.sel{background:rgba(31,122,74,.3);border-left-color:#7fd39a;}
+#relBar{font:600 14px var(--f-body);opacity:.7;margin-top:4px;}
+#flighthud{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(560px,94vw);height:auto;pointer-events:none;}
+#flighthud[hidden]{display:none!important;}
+#console{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(560px,94vw);background:rgba(0,0,0,.88);border:1px solid #3a3;z-index:40;padding:8px 10px;font:600 16px ui-monospace,Menlo,monospace;color:#8f8;}
+#console[hidden]{display:none!important;}
+#console input{all:unset;width:100%;color:#cfc;}
+#consoleLog{max-height:120px;overflow:auto;white-space:pre-wrap;font-size:13px;opacity:.85;}
+#bye h1{font-size:clamp(36px,7vw,64px);}
+#loadAssets{font:600 14px var(--f-body);opacity:.6;}
 </style>
 
 <canvas id="game" tabindex="0" aria-label="Madras Hustle game view"></canvas>
@@ -151,7 +192,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
     <div class="bar" id="fbar" title="Fuel" hidden><i style="width:100%"></i></div>
   </div>
   <div id="mapwrap"><canvas id="minimap" width="420" height="420"></canvas></div>
-  <div id="speedo" hidden><span id="kmh">0</span><small>KM/H</small><div id="vehname"></div></div>
+  <div id="speedo" hidden><span id="kmh">0</span><small>KM/H</small><span id="gear">N</span><div id="vehname"></div></div>
   <div id="loc"><div class="street" id="street"></div><div class="area" id="area"></div></div>
   <div id="timer" hidden></div>
   <div id="objective"></div>
@@ -163,7 +204,29 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
   <div id="alt" hidden></div>
   <div id="crosshair" hidden></div>
   <div id="padHint" hidden>Controller connected</div>
+  <div id="tracker" hidden><h3 id="trkTitle"></h3><ol id="trkList"></ol></div>
+  <canvas id="flighthud" width="840" height="300" hidden></canvas>
+  <div id="dialogue" hidden><div id="dlgWho"></div><div id="dlgText"></div><div id="dlgChoices"></div><div id="relBar"></div></div>
 </div>
+<div id="console" hidden><div id="consoleLog"></div><input id="consoleIn" placeholder="cheat… (HEALME, GIVECASH 5000, SPAWNCAR super, SETWEATHER rain) · Esc to close" autocomplete="off" spellcheck="false"></div>
+<div class="modal" id="briefing" hidden><div class="panel" role="dialog" aria-labelledby="brTitle">
+  <div class="who" id="brWho"></div><h2 id="brTitle"></h2><p id="brText"></p><ol id="brObj"></ol><div class="reward" id="brReward"></div>
+  <div class="row"><button class="go" id="brAccept">Accept</button><button class="ghost" id="brDecline">Decline</button><span style="font:600 14px var(--f-body);opacity:.6">Enter / ✕ accept · Esc / ○ decline</span></div>
+</div></div>
+<div class="modal" id="settings" hidden><div class="panel"><h2>Settings</h2>
+  <div class="set" style="margin-top:14px">
+    <span>Graphics</span><button class="ghost" id="setQuality"></button>
+    <span>Time of day</span><button class="ghost" id="setTime"></button>
+    <span>Weather</span><button class="ghost" id="setWeather"></button>
+    <span>Sound</span><button class="ghost" id="setSound"></button>
+    <span>Camera sensitivity</span><input type="range" id="setSens" min="0.4" max="2" step="0.1">
+    <span>Invert camera Y</span><button class="ghost" id="setInvert"></button>
+    <span>Speed blur</span><button class="ghost" id="setBlur"></button>
+  </div>
+  <div class="row"><button class="go" id="setClose">Done</button></div>
+</div></div>
+<div class="modal" id="missions" hidden><div class="panel"><h2>Missions</h2><div class="who" id="msSummary"></div><div class="mlist" id="msList"></div>
+  <div class="row"><button class="go" id="msClose">Close</button></div></div></div>
 <div id="scope" hidden></div>
 <div id="hurt"></div>
 <div id="fade"></div>
@@ -172,11 +235,11 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
 <div class="screen" id="title">
   <div class="card">
     <div class="sign"><div class="ta">CHENNAI · 13°N 80°E</div><h1>Madras<br>Hustle</h1></div>
-    <p class="tag">An open-world crime game on <b>200 km² of real Chennai streets</b>. Rob stores, buy guns, cars, boats, jets and penthouses, fly from the airport, ride the trains, and stay one step ahead of the cops. Plays with keyboard and mouse or a <b>PS4 / PS5 controller</b>.</p>
+    <p class="tag">An open-world crime game on <b>200 km² of real Chennai streets</b>. Check in at the airport and fly the plane yourself, ride the metro across town, run errands for your family, rob stores, and stay one step ahead of the cops. Plays with keyboard and mouse or a <b>PS4 / PS5 controller</b>.</p>
     <div class="places"><span>Egmore</span><span>Nungambakkam</span><span>Mount Road</span><span>T Nagar</span><span>Adyar</span><span>Marina</span><span>Airport</span><span>Port</span></div>
     <div class="loadbar"><i id="loadfill"></i></div>
     <div id="loadtext">Downloading the city map…</div>
-    <div class="btnrow"><button class="go" id="startBtn" disabled>Start</button><button class="ghost" id="controlsBtn">Controls</button></div>
+    <div class="btnrow"><button class="go" id="startBtn" disabled>Play</button><button class="ghost" id="titleMissionsBtn">Missions</button><button class="ghost" id="titleSettingsBtn">Settings</button><button class="ghost" id="controlsBtn">Controls</button><button class="ghost" id="exitBtn">Exit</button></div>
     <div id="touchnote" hidden>This game needs a keyboard or a game controller.</div>
     <p class="credit">Streets, buildings, the Cooum and the coastline come from OpenStreetMap contributors (ODbL). Building heights are estimated where the map has none. All characters and businesses are invented.</p>
   </div>
@@ -204,6 +267,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
         <dt><kbd>H</kbd></dt><dd>Horn</dd><dt><kbd class="pad">L3</kbd></dt>
         <dt><kbd>V</kbd></dt><dd>Look behind</dd><dt><kbd class="pad">R3</kbd></dt>
         <dt><kbd>R</kbd></dt><dd>Flip / reset car</dd><dt><kbd class="pad">○</kbd></dt>
+        <dt><kbd>G</kbd></dt><dd>Headlights: auto / on / off</dd><dt><kbd class="pad">L3</kbd></dt>
         <dt class="hd">Helicopter</dt>
         <dt><kbd>W / S</kbd></dt><dd>Tilt forward / back</dd><dt><kbd class="pad">L stick ↕</kbd></dt>
         <dt><kbd>A / D</kbd></dt><dd>Turn</dd><dt><kbd class="pad">L stick ↔</kbd></dt>
@@ -214,6 +278,11 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
         <dt><kbd>W / S</kbd></dt><dd>Nose down / up</dd><dt><kbd class="pad">L stick ↕</kbd></dt>
         <dt><kbd>A / D</kbd></dt><dd>Roll and turn</dd><dt><kbd class="pad">L stick ↔</kbd></dt>
         <dt><kbd>Q / E</kbd></dt><dd>Rudder</dd><dt><kbd class="pad">L1 / R1</kbd></dt>
+        <dt><kbd>G</kbd></dt><dd>Landing gear up / down</dd><dt><kbd class="pad">L3</kbd></dt>
+        <dt class="hd">Transit</dt>
+        <dt><kbd>E</kbd></dt><dd>Ticket machine, turnstile, check-in, gate</dd><dt><kbd class="pad">D-pad →</kbd></dt>
+        <dt><kbd>F</kbd></dt><dd>Board / leave the train or plane</dd><dt><kbd class="pad">△</kbd></dt>
+        <dt><kbd>C</kbd></dt><dd>Passenger: cabin / outside view</dd><dt><kbd class="pad">D-pad ←</kbd></dt>
         <dt class="hd">Anywhere</dt>
         <dt><kbd>Mouse</kbd></dt><dd>Look around</dd><dt><kbd class="pad">R stick</kbd></dt>
         <dt><kbd>C</kbd></dt><dd>Camera distance</dd><dt><kbd class="pad">D-pad ←</kbd></dt>
@@ -221,6 +290,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
         <dt><kbd>T</kbd></dt><dd>Taxi and auto rides</dd><dt><kbd class="pad">D-pad ↓</kbd></dt>
         <dt><kbd>L</kbd></dt><dd>Daylight mode</dd><dt><kbd class="pad">D-pad ↑</kbd></dt>
         <dt><kbd>P / Esc</kbd></dt><dd>Pause</dd><dt><kbd class="pad">Options</kbd></dt>
+        <dt><kbd>`</kbd></dt><dd>Cheat console (or just type a cheat)</dd><dt></dt>
       </dl>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <h2>Progress</h2>
@@ -229,18 +299,22 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
     </div>
     <div class="btnrow">
       <button class="go" id="resumeBtn">Resume</button>
+      <button class="ghost" id="pauseMissionsBtn">Missions</button>
+      <button class="ghost" id="pauseSettingsBtn">Settings</button>
       <button class="ghost" id="qualityBtn">Graphics: High</button>
       <button class="ghost" id="timeBtn">Time: Always day</button>
       <button class="ghost" id="soundBtn">Sound: On</button>
       <button class="ghost" id="saveBtn">Save game</button>
     </div>
     <div class="btnrow" id="resetRow">
+      <button class="ghost" id="quitBtn">Quit to main menu</button>
       <button class="ghost" id="resetBtn">Reset progress</button>
       <span id="resetConfirm" hidden style="display:flex;gap:10px;align-items:center;font:600 17px var(--f-body)">Erase your save? <button class="ghost" id="resetYes">Erase</button><button class="ghost" id="resetNo">Keep</button></span>
     </div>
   </div>
 </div>
 
+<div class="screen" id="bye" hidden><div class="card"><div class="sign"><div class="ta">VANAKKAM</div><h1>See you<br>soon</h1></div><p class="tag">Your progress is saved in this browser. Close the tab, or jump back in.</p><div class="btnrow"><button class="go" id="byeBack">Back to menu</button></div></div></div>
 <div id="bigmap" hidden>
   <canvas id="bigmapCanvas"></canvas>
   <div id="bigmapInfo">Click a street to set a route · scroll to zoom · drag to pan · M to close<br>Controller: left stick pans · R2/L2 zoom · ✕ sets route · ○ closes</div>

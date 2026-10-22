@@ -304,6 +304,8 @@ class Walker {
       this.h = headingTo(tx, tz); this.x += tx / l * 2.2 * dt; this.z += tz / l * 2.2 * dt; animatePerson(p, 2.2, dt);
     } else if (this.state === 'stand') {
       animatePerson(p, 0, dt);
+    } else if (this.state === 'sit') {
+      animatePerson(p, 0, dt, 'sit');
     } else {
       if (this.e < 0) { this.snapToRoad(); if (this.e < 0) { this.state = 'idle'; } }
       else {

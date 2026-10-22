@@ -147,6 +147,7 @@ function roadInside(pts, minx, minz, maxx, maxz, top) {
   return inside;
 }
 async function initWorld(progress) {
+  WorldFix.apply(WD);
   const enc = WD.meta.delta;
   // ---- graph ----
   for (const n of WD.nodes) G.nodes.push({ x: n[0] / 10, z: n[1] / 10, y: n[2] / 10, out: [], adj: [], edges: [] });
@@ -205,7 +206,7 @@ async function initWorld(progress) {
     const g = new THREE.ExtrudeGeometry(s, { depth: 0.95, bevelEnabled: false }); g.rotateX(-Math.PI / 2);
     const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 0.25, uv.getY(i) * 0.25);
     const m = new THREE.Mesh(g, M.platform); m.receiveShadow = true; scene.add(m);
-    addWallRing(toPts(d.p), 0.95);
+    addWallRing(toPts(d.p), 0.95, Layers.Curb); addWalkSurface(toPts(d.p), 0.95);
   }
   buildRails(); buildAirport(); buildPiers();
   progress(0.3, 'Surveying 130,000 buildings…'); await tick();
@@ -215,6 +216,7 @@ async function initWorld(progress) {
   let bi = 0, droppedB = 0, openB = 0;
   for (const b of WD.buildings) {
     bi++;
+    if (WorldFix.dropB.has(bi - 1)) { droppedB++; continue; }
     if (bi % 20000 === 0) { progress(0.3 + 0.35 * bi / WD.buildings.length, `Surveying buildings ${bi.toLocaleString()} / ${WD.buildings.length.toLocaleString()}…`); await tick(); }
     const pp = undelta(b.p, enc);
     let pts = toPts(pp); if (pts.length < 3) continue;
@@ -228,7 +230,8 @@ async function initWorld(progress) {
     for (const p of pts) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); minz = Math.min(minz, p[1]); maxz = Math.max(maxz, p[1]); }
     // a road runs through this footprint (canopies, misaligned outlines, terminal forecourts): never let it block traffic
     const onRoad = roadInside(pts, minx, minz, maxx, maxz, hh);
-    if (onRoad >= 2.5) { if (area < 2500 || h < 9) { droppedB++; continue; } openB++; }
+    // big structures with a road through them (terminal forecourts, gateways) keep every wall except where the road passes
+    if (onRoad >= 2.5) { if (area < 2500 || h < 9) { droppedB++; continue; } openB++; addWallRing(pts, hh, Layers.Obstacle, wallCrossedByRoad); }
     else addWallRing(pts, hh);
     const pi = bPolys.length; bPolys.push({ pts, minx, maxx, minz, maxz, h: hh, name: b.n || '', A, cx, cz, area });
     gridAdd(bPolyGrid, BC, minx, minz, maxx, maxz, pi);
@@ -249,6 +252,11 @@ async function initWorld(progress) {
   progress(0.72, 'Laying the city around you…'); await tick();
 }
 
+function wallCrossedByRoad(p, q) {
+  const L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = Math.max(2, Math.ceil(L / 2));
+  for (let j = 0; j <= n; j++) { const t = j / n, r = roadQuery(p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t, 10); if (r.seg && r.d < 1.5 && !(r.seg.elev && r.y > 3)) return true; }
+  return false;
+}
 // ---------- chunk streaming ----------
 const RNEAR = 520, RFAR = 1350;
 let streamBudget = 0;
@@ -336,7 +344,7 @@ function buildNear(c) {
         }
       }
     }
-    if (E.br && !E.elev && E.len < 260) { const rr = ribbon(new GeoBuf(false), E.xs, E.zs, E.ys, hw, hw, 0); _col.setHex(0xcfc8ba); if (rr) { vwall(cb, rr.L, 0, 0.95); vwall(cb, rr.R, 0, 0.95); } }
+    if (E.br && !E.elev) { const rr = ribbon(new GeoBuf(false), E.xs, E.zs, E.ys, hw, hw, 0); _col.setHex(0xcfc8ba); if (rr) { vwall(cb, rr.L, 0, 0.95); vwall(cb, rr.R, 0, 0.95); } }
     if (!E.elev && E.c <= 2 && hw >= 3.2 && E.len - trimA - trimB > 12) {
       const s0 = trimA + 3, s1 = E.len - trimB - 3;
       const lanes = E.o === 0 ? [0] : [];
@@ -488,7 +496,12 @@ function initTreeGeos() {
   const fronds = [];
   for (let i = 0; i < 8; i++) { const f = new THREE.PlaneGeometry(0.9, 4.4, 1, 3); const pa = f.attributes.position; for (let k = 0; k < pa.count; k++) { const yy = pa.getY(k) + 2.2; pa.setY(k, yy); pa.setZ(k, -yy * yy * 0.06); } f.rotateX(0.9); f.rotateY(i / 8 * TAU); f.translate(0, 8.4, 0); fronds.push(f); }
   const frondG = mergeGeometries(fronds); frondG.computeVertexNormals();
-  TREE_G = { trunkG, canG, pTrunkG, frondG, greens: [0x4f7d33, 0x5d8c3a, 0x3f6b2c, 0x6c9a45, 0x7a8f3a, 0x4a7a3c, 0x58803a, 0x6a8e2e].map(h => new THREE.Color(h)) };
+  // prefer the Blender-built neem / palm models
+  const neem = Assets.mergedByMaterial('neem'), palm = Assets.mergedByMaterial('palm');
+  const T_ = { trunkG, canG, pTrunkG, frondG };
+  if (neem && neem.Trunk && neem.Leaf) { T_.trunkG = neem.Trunk; T_.canG = neem.Leaf; }
+  if (palm && palm.Trunk && palm.Leaf) { T_.pTrunkG = palm.Trunk; T_.frondG = palm.Coconut ? mergeGeometries([palm.Leaf, palm.Coconut]) : palm.Leaf; }
+  TREE_G = { trunkG: T_.trunkG, canG: T_.canG, pTrunkG: T_.pTrunkG, frondG: T_.frondG, greens: [0x4f7d33, 0x5d8c3a, 0x3f6b2c, 0x6c9a45, 0x7a8f3a, 0x4a7a3c, 0x58803a, 0x6a8e2e].map(h => new THREE.Color(h)) };
 }
 function buildTreesFor(c) {
   const trees = c.trees.filter(t => !t[3]), palms = c.trees.filter(t => t[3]);
@@ -552,16 +565,63 @@ function buildRails() {
   if (!railB.empty) { const m = new THREE.Mesh(railB.geometry(), M.ballast); m.receiveShadow = true; scene.add(m); }
   if (!steel.empty) scene.add(new THREE.Mesh(steel.geometry(), M.rail));
   if (!via.empty) { const m = new THREE.Mesh(via.geometry(), M.concrete); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
-  // stations along each line
+  // stations along each line (names kept for the metro system)
   for (const L of railLines) {
+    L.stopMeta = [];
     for (const p of G.pois) {
       if (p.t !== 'station' && p.t !== 'metro') continue;
       let best = 1e9, bs = 0;
       for (let k = 0; k < L.xs.length; k++) { const d = dist2(L.xs[k], L.zs[k], p.x, p.z); if (d < best) { best = d; bs = L.cum[k]; } }
-      if (best < 90 * 90 && !L.stops.some(s => Math.abs(s - bs) < 300)) L.stops.push(bs);
+      if (best < 90 * 90 && !L.stops.some(s => Math.abs(s - bs) < 300)) { L.stops.push(bs); const rp = railPoint(L, bs); L.stopMeta.push({ s: bs, name: p.n || 'Station', metro: p.t === 'metro', x: rp.x, y: rp.y - 0.15, z: rp.z, px: p.x, pz: p.z }); }
     }
-    L.stops.sort((a, b) => a - b);
+    L.stops.sort((a, b) => a - b); L.stopMeta.sort((a, b) => a.s - b.s);
   }
+  buildPortals(); buildElevatedStations();
+}
+// tunnel portal hoods where a line dips below ground (WorldFix ramps dangling viaducts into these)
+function buildPortals() {
+  const pb = new GeoBuf(true); const conc = new THREE.Color(0xa7a197), dark = new THREE.Color(0x07080a); let n = 0;
+  for (const L of railLines) for (let k = 0; k < L.xs.length - 1; k++) {
+    const y0 = L.ys[k], y1 = L.ys[k + 1]; if ((y0 >= 0) === (y1 >= 0)) continue;
+    const t = y0 / (y0 - y1), x = L.xs[k] + (L.xs[k + 1] - L.xs[k]) * t, z = L.zs[k] + (L.zs[k + 1] - L.zs[k]) * t;
+    let tx = L.xs[k + 1] - L.xs[k], tz = L.zs[k + 1] - L.zs[k]; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl; if (y1 > y0) { tx = -tx; tz = -tz; }  // point into the tunnel
+    const rot = Math.atan2(tx, tz), cx = x + tx * 16, cz = z + tz * 16;
+    boxTo(pb, cx, 3.2, cz, 8.4, 6.4, 32, rot, conc);                                   // hood over the cutting
+    boxTo(pb, x - tx * 0.08, 2.6, z - tz * 0.08, 5.6, 5.0, 0.12, rot, dark);            // dark tunnel mouth
+    boxTo(pb, x - tx * 0.3, 6.6, z - tz * 0.3, 9.6, 0.8, 0.6, rot, conc);              // headwall lip
+    for (const sd of [-1, 1]) boxTo(pb, x - tx * 6 + tz * sd * 4.6, 0.7, z - tz * 6 - tx * sd * 4.6, 0.6, 1.4, 12, rot, conc);  // wing walls
+    const hx = 4.2, hz = 16, c = Math.cos(rot), s2 = Math.sin(rot), P = (lx, lz) => [cx + lx * c + lz * s2, cz - lx * s2 + lz * c];
+    addWallRing([P(-hx, -hz), P(hx, -hz), P(hx, hz), P(-hx, hz)], 6.4, Layers.Obstacle, wallCrossedByRoad); n++;
+  }
+  if (!pb.empty) { const m = new THREE.Mesh(pb.geometry(), M.vcol); m.castShadow = m.receiveShadow = true; scene.add(m); }
+  WorldFix.stats.portalHoodsBuilt = n;
+}
+// metro stations on viaducts: side platforms at deck level, canopy roof, columns and a stair tower
+function buildElevatedStations() {
+  const sb = new GeoBuf(true); const plat = new THREE.Color(0xc9c3b6), roof = new THREE.Color(0x2f6fb5), col = new THREE.Color(0xb2ab9e), glass = new THREE.Color(0x9fc4dc); let n = 0;
+  const built = [];
+  for (const L of railLines) for (const st of L.stopMeta) {
+    if (st.y < 3.5) continue;
+    const twin = built.find(b => dist2(b.x, b.z, st.x, st.z) < 70 * 70);   // parallel tracks share one station
+    if (twin) { st.elevated = true; st.rot = twin.rot; continue; }
+    built.push(st);
+    const a = railPoint(L, st.s - 5), b = railPoint(L, st.s + 5); const rot = Math.atan2(b.x - a.x, b.z - a.z), tx = Math.sin(rot), tz = Math.cos(rot);
+    st.elevated = true; st.rot = rot; n++; built[built.length - 1].rot = rot;
+    for (const sd of [-1, 1]) {
+      const ox = tz * sd * 3.9, oz = -tx * sd * 3.9;
+      boxTo(sb, st.x + ox, st.y + 0.45, st.z + oz, 3.6, 1.0, 130, rot, plat);                      // platform slab
+      boxTo(sb, st.x + ox * 1.48, st.y + 1.6, st.z + oz * 1.48, 0.15, 1.3, 130, rot, glass);        // glass parapet
+      for (let k = -60; k <= 60; k += 15) boxTo(sb, st.x + ox * 1.42 + tx * k, st.y + 3.6, st.z + oz * 1.42 + tz * k, 0.3, 5.4, 0.3, 0, col);
+    }
+    boxTo(sb, st.x, st.y + 6.5, st.z, 14, 0.45, 136, rot, roof);                                   // canopy
+    boxTo(sb, st.x, st.y + 6.95, st.z, 9, 0.5, 120, rot, new THREE.Color(0xe9ecef));
+    for (let k = -50; k <= 50; k += 25) boxTo(sb, st.x + tx * k, (st.y - 0.6) / 2, st.z + tz * k, 2.2, st.y - 0.6, 2.2, rot, col);   // concourse piers
+    boxTo(sb, st.x, st.y - 2.2, st.z, 18, 3.2, 60, rot, new THREE.Color(0xd8d2c4));                // concourse box under the deck
+    const sx = st.x + Math.cos(rot) * 11, sz = st.z - Math.sin(rot) * 11;
+    boxTo(sb, sx, st.y / 2, sz, 4.5, st.y, 9, rot, new THREE.Color(0xd8d2c4));                      // stair / lift tower
+  }
+  if (!sb.empty) { const m = new THREE.Mesh(sb.geometry(), M.vcol); m.castShadow = m.receiveShadow = true; scene.add(m); }
+  WorldFix.stats.elevatedStationsBuilt = n;
 }
 const AIR = { runways: [], helipads: [] };
 function buildAirport() {
@@ -585,6 +645,33 @@ function buildAirport() {
     ribbon(ab, xs, zs, null, r.w / 20, r.w / 20, 0.105, 0.08); ribbon(yb, xs, zs, null, 0.15, 0.15, 0.118);
   }
   for (const h of A.helipad) AIR.helipads.push([h[0] / 10, h[1] / 10]);
+  // perimeter fence with gaps where public roads enter the airport
+  const fence = WorldFix.fence, fb = new GeoBuf(true), steel = new THREE.Color(0x8d939a); let gaps = 0, segs = 0;
+  for (let i = 0; i < fence.length; i++) {
+    const p = fence[i], q = fence[(i + 1) % fence.length], L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = Math.max(1, Math.ceil(L / 6));
+    const rot = Math.atan2(q[0] - p[0], q[1] - p[1]);
+    for (let j = 0; j < n; j++) {
+      const a = [p[0] + (q[0] - p[0]) * j / n, p[1] + (q[1] - p[1]) * j / n], b = [p[0] + (q[0] - p[0]) * (j + 1) / n, p[1] + (q[1] - p[1]) * (j + 1) / n];
+      const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, r = roadQuery(mx, mz, 20);
+      if ((r.seg && r.d < 4) || inWater(mx, mz) || insideBuilding(mx, mz) >= 0) { gaps++; continue; }
+      boxTo(fb, a[0], 1.4, a[1], 0.12, 2.8, 0.12, 0, steel);
+      boxTo(fb, mx, 1.35, mz, 0.04, 2.5, Math.hypot(b[0] - a[0], b[1] - a[1]), rot, new THREE.Color(0x6f7680));
+      boxTo(fb, mx, 2.85, mz, 0.06, 0.06, Math.hypot(b[0] - a[0], b[1] - a[1]), rot, steel);
+      addWallRing([a, b], 2.8); segs++;   // a two-point ring yields both faces
+    }
+  }
+  if (!fb.empty) { const m = new THREE.Mesh(fb.geometry(), M.vcol); m.castShadow = true; scene.add(m); }
+  // departures drop-off bay at the main terminal
+  const term = G.pois.filter(p => p.t === 'airport' && /terminal/i.test(p.n) && !/cargo/i.test(p.n)).sort((a, b) => b.a - a.a)[0];
+  if (term) {
+    const r = roadQuery(term.x, term.z, 250, 0);
+    if (r.seg) {
+      const s_ = r.seg, tx = (s_.bx - s_.ax) / (Math.hypot(s_.bx - s_.ax, s_.bz - s_.az) || 1), tz = (s_.bz - s_.az) / (Math.hypot(s_.bx - s_.ax, s_.bz - s_.az) || 1);
+      WorldFix.dropoff = { x: r.px, z: r.pz, h: Math.atan2(tx, tz), name: term.n, tx: term.x, tz: term.z };
+      for (let o = -12; o <= 12; o += 3) ribbon(yb, [r.px + tx * o - tz * 2, r.px + tx * o + tz * 2], [r.pz + tz * o + tx * 2, r.pz + tz * o - tx * 2], null, 0.2, 0.2, RY + 0.02);
+    }
+  }
+  WorldFix.stats.fenceSegments = segs; WorldFix.stats.fenceGaps = gaps;
   if (!ab.empty) { const m = new THREE.Mesh(ab.geometry(), M.road); m.receiveShadow = true; scene.add(m); }
   if (!mk.empty) scene.add(new THREE.Mesh(mk.geometry(), M.mark));
   if (!yb.empty) scene.add(new THREE.Mesh(yb.geometry(), M.markY));

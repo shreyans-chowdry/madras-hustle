@@ -20,6 +20,7 @@ function fastTravel(x, z, msg) {
 // board a moving train when it is stopped next to you
 function trainBoarding() {
   if (player.veh || player.interior || player.dead) return;
+  if (Metro.ride && player.onTrain === Metro.ride.T) { Metro.rideUpdate(1 / 60); return; }
   if (player.onTrain) {
     const T = player.onTrain; const c = T.coaches[Math.floor(T.n / 2)];
     player.x = c.position.x; player.z = c.position.z; player.y = c.position.y + 1.1; player.h = c.rotation.y;
@@ -60,8 +61,8 @@ function updateFlights(dt) {
     F.t += dt;
     let sp = Math.hypot(v.vx, v.vz, v.vy);
     if (F.phase === 'roll') { sp = Math.min(sp + 3.2 * dt, 85); v.vx = F.tx * sp; v.vz = F.tz * sp; if (sp > 72) F.phase = 'climb'; }
-    else if (F.phase === 'climb') { v.pitch += (0.17 - v.pitch) * dt; sp = Math.min(sp + 1.5 * dt, 110); v.vy = Math.sin(v.pitch) * sp; const hz = Math.cos(v.pitch) * sp; v.vx = F.tx * hz; v.vz = F.tz * hz; if (v.y > 900) { v.remove(); flights.splice(i, 1); continue; } }
-    else if (F.phase === 'approach') { const dleft = Math.hypot(v.tdx - v.x, v.tdz - v.z); const want = Math.max(0, dleft * Math.tan(3 * Math.PI / 180)); v.vy = clamp((want - v.y) * 0.8, -6, 2); if (v.y < 3) { F.phase = 'rollout'; v.y = 0; v.pitch = 0; } }
+    else if (F.phase === 'climb') { if (v.y > 40) v.gearDown = false; v.pitch += (0.17 - v.pitch) * dt; sp = Math.min(sp + 1.5 * dt, 110); v.vy = Math.sin(v.pitch) * sp; const hz = Math.cos(v.pitch) * sp; v.vx = F.tx * hz; v.vz = F.tz * hz; if (v.y > 900) { v.remove(); flights.splice(i, 1); continue; } }
+    else if (F.phase === 'approach') { if (v.y < 300) v.gearDown = true; const dleft = Math.hypot(v.tdx - v.x, v.tdz - v.z); const want = Math.max(0, dleft * Math.tan(3 * Math.PI / 180)); v.vy = clamp((want - v.y) * 0.8, -6, 2); if (v.y < 3) { F.phase = 'rollout'; v.y = 0; v.pitch = 0; } }
     else if (F.phase === 'rollout') { sp = Math.max(0, sp - 3.5 * dt); v.vx = F.tx * sp; v.vz = F.tz * sp; v.vy = 0; if (sp === 0) { F.phase = 'parked'; F.t = 0; } }
     else if (F.phase === 'parked') { if (F.t > 60 && dist2(v.x, v.z, player.x, player.z) > 600 * 600) { v.remove(); flights.splice(i, 1); continue; } }
     v.x += v.vx * dt; v.z += v.vz * dt; v.y = Math.max(0, v.y + v.vy * dt);
