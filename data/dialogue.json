@@ -1,0 +1,64 @@
+{
+  "contacts": {
+    "amma": { "name": "Amma", "role": "Your mother", "color": "#ff8ab4" },
+    "karthik": { "name": "Karthik", "role": "Your cousin", "color": "#7fd39a" },
+    "selvi": { "name": "Selvi", "role": "Runs the filter-coffee cafe", "color": "#e0a060" },
+    "priya": { "name": "Priya", "role": "Airline dispatcher", "color": "#8ec8ff" },
+    "anand": { "name": "Anand", "role": "Metro courier", "color": "#ffd24c" }
+  },
+  "trees": {
+    "amma": {
+      "start": "hello",
+      "nodes": {
+        "hello": { "who": "amma", "text": "Kanna! You finally remember where your mother lives. Have you eaten?",
+          "choices": [
+            { "text": "I ate, Amma. Don't worry.", "next": "worry", "rel": { "amma": 2 } },
+            { "text": "Not yet. Is there sambar?", "next": "food", "rel": { "amma": 5 } },
+            { "text": "Is there any work, Amma? Anything you need?", "next": "favor", "cond": "!done:m15" },
+            { "text": "I can't stay long.", "next": "bye", "rel": { "amma": -3 } }
+          ] },
+        "worry": { "who": "amma", "text": "Hmph. You are thinner than last time. Sit, sit.", "next": "hello2" },
+        "food": { "who": "amma", "text": "Always sambar. Take some home. And call your father once in a while.", "give": { "health": 100 }, "next": "hello2" },
+        "hello2": { "who": "amma", "text": "So? What brings you home?",
+          "choices": [
+            { "text": "Anything you need done?", "next": "favor", "cond": "!done:m15" },
+            { "text": "Just visiting. Bye, Amma.", "next": "bye" }
+          ] },
+        "favor": { "who": "amma", "text": "Your father's old Ambassador has to reach Uncle Raju's garage before he closes. Your father is at the temple and you know he drives like a bullock cart. Can you take it? Don't scratch it.",
+          "choices": [
+            { "text": "Of course. I'll take it right now.", "next": "yes", "rel": { "amma": 6 }, "event": "family:favor_accepted" },
+            { "text": "Maybe later.", "next": "bye", "rel": { "amma": -2 } }
+          ] },
+        "yes": { "who": "amma", "text": "Keys are in the car outside. Uncle Raju closes soon, so go fast but carefully. And take this for petrol.", "give": { "cash": 200 }, "end": true },
+        "bye": { "who": "amma", "text": "Go, go. Come for dinner on Sunday.", "end": true }
+      }
+    },
+    "karthik": {
+      "start": "k1",
+      "nodes": {
+        "k1": { "who": "karthik", "text": "Machan! Heard you're doing big things now. Airport, metro, all that.",
+          "choices": [
+            { "text": "Just hustling. You?", "next": "k2", "rel": { "karthik": 3 } },
+            { "text": "Keep it quiet around Amma.", "next": "k3", "rel": { "karthik": 1 } }
+          ] },
+        "k2": { "who": "karthik", "text": "Engineering exams. Again. If you're flying out of Meenambakkam, tell Priya at check-in I said hi.", "end": true },
+        "k3": { "who": "karthik", "text": "My lips are sealed. For a coffee at Selvi's, maybe.", "end": true }
+      }
+    },
+    "selvi": {
+      "start": "s1",
+      "nodes": {
+        "s1": { "who": "selvi", "text": "Vanakkam! Filter coffee, strong, less sugar? Or are you here for the other business?",
+          "choices": [
+            { "text": "Filter coffee, please.", "next": "coffee", "rel": { "selvi": 2 } },
+            { "text": "A masala dosa.", "next": "dosa", "rel": { "selvi": 2 } },
+            { "text": "What other business?", "next": "work" },
+            { "text": "Just looking.", "end": true }
+          ] },
+        "coffee": { "who": "selvi", "text": "Here. Hot like the afternoon on Mount Road.", "give": { "health": 15, "cash": -5 }, "end": true },
+        "dosa": { "who": "selvi", "text": "Crispy, just how you like it.", "give": { "health": 40, "cash": -12 }, "end": true },
+        "work": { "who": "selvi", "text": "Anand drops packages on the metro for people who pay well. If you want in, find his marker. He hates people who are late.", "rel": { "selvi": 1 }, "end": true }
+      }
+    }
+  }
+}

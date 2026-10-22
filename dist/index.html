@@ -142,6 +142,47 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
 .ctl .hd{font:700 13px var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--auto);grid-column:1/-1;margin-top:6px;}
 .ctl dd{margin:0;opacity:.85;min-width:0;}
 .g{color:#8ee07a;}
+
+/* ---------- overhaul: tracker, briefing, dialogue, flight HUD, console, panels ---------- */
+#gear{display:inline-block;margin-left:10px;font:400 22px/1 var(--f-display);color:var(--auto);}
+#tracker{position:absolute;left:max(18px,env(safe-area-inset-left,0px));top:calc(120px + env(safe-area-inset-top,0px));width:min(320px,70vw);background:linear-gradient(90deg,rgba(10,9,7,.82),rgba(10,9,7,.35));border-left:4px solid var(--auto);padding:10px 14px;}
+#tracker[hidden]{display:none!important;}
+#tracker h3{margin:0 0 6px;font:400 18px/1.1 var(--f-display);color:var(--auto);letter-spacing:.02em;}
+#tracker ol{margin:0;padding:0;list-style:none;font:600 16px/1.35 var(--f-body);}
+#tracker li{display:flex;gap:8px;opacity:.55;} #tracker li.cur{opacity:1;color:var(--paper);} #tracker li.done{opacity:.5;text-decoration:line-through;}
+#tracker li:before{content:"○";color:var(--auto);} #tracker li.done:before{content:"✓";color:#8ee07a;} #tracker li.cur:before{content:"►";}
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,8,10,.55);z-index:30;padding:16px;}
+.modal[hidden]{display:none!important;}
+.panel{width:min(560px,100%);max-height:88vh;overflow:auto;background:rgba(14,15,18,.96);border-top:6px solid var(--auto);box-shadow:0 20px 60px rgba(0,0,0,.6);padding:20px 22px;}
+.panel h2{font:400 clamp(26px,5vw,38px)/1 var(--f-display);margin:0 0 4px;}
+.panel .who{font:700 15px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:#9fb0c0;}
+.panel p{font:500 18px/1.4 var(--f-body);margin:12px 0;}
+.panel ol{font:600 17px/1.5 var(--f-body);padding-left:22px;margin:8px 0 14px;}
+.panel .reward{font:700 18px var(--f-body);color:#8ee07a;}
+.panel .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+.set{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;font:600 18px var(--f-body);}
+.set button{min-width:150px;}
+.set input[type=range]{width:150px;accent-color:var(--auto);}
+.mlist{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.mlist div{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 10px;background:rgba(255,255,255,.04);border-left:4px solid #555;font:600 17px var(--f-body);}
+.mlist div.av{border-left-color:var(--auto);} .mlist div.dn{border-left-color:#5ac85a;opacity:.75;} .mlist div.lk{opacity:.45;}
+.mlist small{grid-column:1/-1;font:500 14px var(--f-body);opacity:.75;}
+#dialogue{position:absolute;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(640px,92vw);background:rgba(12,13,15,.92);border-left:5px solid var(--leaf);padding:12px 16px;pointer-events:auto;}
+#dialogue[hidden]{display:none!important;}
+#dlgWho{font:800 15px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:#7fd39a;}
+#dlgText{font:500 20px/1.35 var(--f-body);margin:4px 0 8px;}
+#dlgChoices{display:flex;flex-direction:column;gap:4px;}
+#dlgChoices button{all:unset;cursor:pointer;font:600 18px var(--f-body);padding:4px 8px;border-left:3px solid transparent;}
+#dlgChoices button.sel{background:rgba(31,122,74,.3);border-left-color:#7fd39a;}
+#relBar{font:600 14px var(--f-body);opacity:.7;margin-top:4px;}
+#flighthud{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(560px,94vw);height:auto;pointer-events:none;}
+#flighthud[hidden]{display:none!important;}
+#console{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translateX(-50%);width:min(560px,94vw);background:rgba(0,0,0,.88);border:1px solid #3a3;z-index:40;padding:8px 10px;font:600 16px ui-monospace,Menlo,monospace;color:#8f8;}
+#console[hidden]{display:none!important;}
+#console input{all:unset;width:100%;color:#cfc;}
+#consoleLog{max-height:120px;overflow:auto;white-space:pre-wrap;font-size:13px;opacity:.85;}
+#bye h1{font-size:clamp(36px,7vw,64px);}
+#loadAssets{font:600 14px var(--f-body);opacity:.6;}
 </style>
 
 <canvas id="game" tabindex="0" aria-label="Madras Hustle game view"></canvas>
@@ -158,7 +199,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
     <div class="bar" id="fbar" title="Fuel" hidden><i style="width:100%"></i></div>
   </div>
   <div id="mapwrap"><canvas id="minimap" width="420" height="420"></canvas></div>
-  <div id="speedo" hidden><span id="kmh">0</span><small>KM/H</small><div id="vehname"></div></div>
+  <div id="speedo" hidden><span id="kmh">0</span><small>KM/H</small><span id="gear">N</span><div id="vehname"></div></div>
   <div id="loc"><div class="street" id="street"></div><div class="area" id="area"></div></div>
   <div id="timer" hidden></div>
   <div id="objective"></div>
@@ -170,7 +211,29 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
   <div id="alt" hidden></div>
   <div id="crosshair" hidden></div>
   <div id="padHint" hidden>Controller connected</div>
+  <div id="tracker" hidden><h3 id="trkTitle"></h3><ol id="trkList"></ol></div>
+  <canvas id="flighthud" width="840" height="300" hidden></canvas>
+  <div id="dialogue" hidden><div id="dlgWho"></div><div id="dlgText"></div><div id="dlgChoices"></div><div id="relBar"></div></div>
 </div>
+<div id="console" hidden><div id="consoleLog"></div><input id="consoleIn" placeholder="cheat… (HEALME, GIVECASH 5000, SPAWNCAR super, SETWEATHER rain) · Esc to close" autocomplete="off" spellcheck="false"></div>
+<div class="modal" id="briefing" hidden><div class="panel" role="dialog" aria-labelledby="brTitle">
+  <div class="who" id="brWho"></div><h2 id="brTitle"></h2><p id="brText"></p><ol id="brObj"></ol><div class="reward" id="brReward"></div>
+  <div class="row"><button class="go" id="brAccept">Accept</button><button class="ghost" id="brDecline">Decline</button><span style="font:600 14px var(--f-body);opacity:.6">Enter / ✕ accept · Esc / ○ decline</span></div>
+</div></div>
+<div class="modal" id="settings" hidden><div class="panel"><h2>Settings</h2>
+  <div class="set" style="margin-top:14px">
+    <span>Graphics</span><button class="ghost" id="setQuality"></button>
+    <span>Time of day</span><button class="ghost" id="setTime"></button>
+    <span>Weather</span><button class="ghost" id="setWeather"></button>
+    <span>Sound</span><button class="ghost" id="setSound"></button>
+    <span>Camera sensitivity</span><input type="range" id="setSens" min="0.4" max="2" step="0.1">
+    <span>Invert camera Y</span><button class="ghost" id="setInvert"></button>
+    <span>Speed blur</span><button class="ghost" id="setBlur"></button>
+  </div>
+  <div class="row"><button class="go" id="setClose">Done</button></div>
+</div></div>
+<div class="modal" id="missions" hidden><div class="panel"><h2>Missions</h2><div class="who" id="msSummary"></div><div class="mlist" id="msList"></div>
+  <div class="row"><button class="go" id="msClose">Close</button></div></div></div>
 <div id="scope" hidden></div>
 <div id="hurt"></div>
 <div id="fade"></div>
@@ -179,11 +242,11 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
 <div class="screen" id="title">
   <div class="card">
     <div class="sign"><div class="ta">CHENNAI · 13°N 80°E</div><h1>Madras<br>Hustle</h1></div>
-    <p class="tag">An open-world crime game on <b>200 km² of real Chennai streets</b>. Rob stores, buy guns, cars, boats, jets and penthouses, fly from the airport, ride the trains, and stay one step ahead of the cops. Plays with keyboard and mouse or a <b>PS4 / PS5 controller</b>.</p>
+    <p class="tag">An open-world crime game on <b>200 km² of real Chennai streets</b>. Check in at the airport and fly the plane yourself, ride the metro across town, run errands for your family, rob stores, and stay one step ahead of the cops. Plays with keyboard and mouse or a <b>PS4 / PS5 controller</b>.</p>
     <div class="places"><span>Egmore</span><span>Nungambakkam</span><span>Mount Road</span><span>T Nagar</span><span>Adyar</span><span>Marina</span><span>Airport</span><span>Port</span></div>
     <div class="loadbar"><i id="loadfill"></i></div>
     <div id="loadtext">Downloading the city map…</div>
-    <div class="btnrow"><button class="go" id="startBtn" disabled>Start</button><button class="ghost" id="controlsBtn">Controls</button></div>
+    <div class="btnrow"><button class="go" id="startBtn" disabled>Play</button><button class="ghost" id="titleMissionsBtn">Missions</button><button class="ghost" id="titleSettingsBtn">Settings</button><button class="ghost" id="controlsBtn">Controls</button><button class="ghost" id="exitBtn">Exit</button></div>
     <div id="touchnote" hidden>This game needs a keyboard or a game controller.</div>
     <p class="credit">Streets, buildings, the Cooum and the coastline come from OpenStreetMap contributors (ODbL). Building heights are estimated where the map has none. All characters and businesses are invented.</p>
   </div>
@@ -211,6 +274,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
         <dt><kbd>H</kbd></dt><dd>Horn</dd><dt><kbd class="pad">L3</kbd></dt>
         <dt><kbd>V</kbd></dt><dd>Look behind</dd><dt><kbd class="pad">R3</kbd></dt>
         <dt><kbd>R</kbd></dt><dd>Flip / reset car</dd><dt><kbd class="pad">○</kbd></dt>
+        <dt><kbd>G</kbd></dt><dd>Headlights: auto / on / off</dd><dt><kbd class="pad">L3</kbd></dt>
         <dt class="hd">Helicopter</dt>
         <dt><kbd>W / S</kbd></dt><dd>Tilt forward / back</dd><dt><kbd class="pad">L stick ↕</kbd></dt>
         <dt><kbd>A / D</kbd></dt><dd>Turn</dd><dt><kbd class="pad">L stick ↔</kbd></dt>
@@ -221,6 +285,11 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
         <dt><kbd>W / S</kbd></dt><dd>Nose down / up</dd><dt><kbd class="pad">L stick ↕</kbd></dt>
         <dt><kbd>A / D</kbd></dt><dd>Roll and turn</dd><dt><kbd class="pad">L stick ↔</kbd></dt>
         <dt><kbd>Q / E</kbd></dt><dd>Rudder</dd><dt><kbd class="pad">L1 / R1</kbd></dt>
+        <dt><kbd>G</kbd></dt><dd>Landing gear up / down</dd><dt><kbd class="pad">L3</kbd></dt>
+        <dt class="hd">Transit</dt>
+        <dt><kbd>E</kbd></dt><dd>Ticket machine, turnstile, check-in, gate</dd><dt><kbd class="pad">D-pad →</kbd></dt>
+        <dt><kbd>F</kbd></dt><dd>Board / leave the train or plane</dd><dt><kbd class="pad">△</kbd></dt>
+        <dt><kbd>C</kbd></dt><dd>Passenger: cabin / outside view</dd><dt><kbd class="pad">D-pad ←</kbd></dt>
         <dt class="hd">Anywhere</dt>
         <dt><kbd>Mouse</kbd></dt><dd>Look around</dd><dt><kbd class="pad">R stick</kbd></dt>
         <dt><kbd>C</kbd></dt><dd>Camera distance</dd><dt><kbd class="pad">D-pad ←</kbd></dt>
@@ -228,6 +297,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
         <dt><kbd>T</kbd></dt><dd>Taxi and auto rides</dd><dt><kbd class="pad">D-pad ↓</kbd></dt>
         <dt><kbd>L</kbd></dt><dd>Daylight mode</dd><dt><kbd class="pad">D-pad ↑</kbd></dt>
         <dt><kbd>P / Esc</kbd></dt><dd>Pause</dd><dt><kbd class="pad">Options</kbd></dt>
+        <dt><kbd>`</kbd></dt><dd>Cheat console (or just type a cheat)</dd><dt></dt>
       </dl>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <h2>Progress</h2>
@@ -236,18 +306,22 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
     </div>
     <div class="btnrow">
       <button class="go" id="resumeBtn">Resume</button>
+      <button class="ghost" id="pauseMissionsBtn">Missions</button>
+      <button class="ghost" id="pauseSettingsBtn">Settings</button>
       <button class="ghost" id="qualityBtn">Graphics: High</button>
       <button class="ghost" id="timeBtn">Time: Always day</button>
       <button class="ghost" id="soundBtn">Sound: On</button>
       <button class="ghost" id="saveBtn">Save game</button>
     </div>
     <div class="btnrow" id="resetRow">
+      <button class="ghost" id="quitBtn">Quit to main menu</button>
       <button class="ghost" id="resetBtn">Reset progress</button>
       <span id="resetConfirm" hidden style="display:flex;gap:10px;align-items:center;font:600 17px var(--f-body)">Erase your save? <button class="ghost" id="resetYes">Erase</button><button class="ghost" id="resetNo">Keep</button></span>
     </div>
   </div>
 </div>
 
+<div class="screen" id="bye" hidden><div class="card"><div class="sign"><div class="ta">VANAKKAM</div><h1>See you<br>soon</h1></div><p class="tag">Your progress is saved in this browser. Close the tab, or jump back in.</p><div class="btnrow"><button class="go" id="byeBack">Back to menu</button></div></div></div>
 <div id="bigmap" hidden>
   <canvas id="bigmapCanvas"></canvas>
   <div id="bigmapInfo">Click a street to set a route · scroll to zoom · drag to pan · M to close<br>Controller: left stick pans · R2/L2 zoom · ✕ sets route · ○ closes</div>
@@ -256,6 +330,7 @@ kbd.pad{background:#2b3a8a;color:#fff;box-shadow:0 2px 0 #121a44;border-radius:1
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
+const DIALOGUE_DATA = {"contacts": {"amma": {"name": "Amma", "role": "Your mother", "color": "#ff8ab4"}, "karthik": {"name": "Karthik", "role": "Your cousin", "color": "#7fd39a"}, "selvi": {"name": "Selvi", "role": "Runs the filter-coffee cafe", "color": "#e0a060"}, "priya": {"name": "Priya", "role": "Airline dispatcher", "color": "#8ec8ff"}, "anand": {"name": "Anand", "role": "Metro courier", "color": "#ffd24c"}}, "trees": {"amma": {"start": "hello", "nodes": {"hello": {"who": "amma", "text": "Kanna! You finally remember where your mother lives. Have you eaten?", "choices": [{"text": "I ate, Amma. Don't worry.", "next": "worry", "rel": {"amma": 2}}, {"text": "Not yet. Is there sambar?", "next": "food", "rel": {"amma": 5}}, {"text": "Is there any work, Amma? Anything you need?", "next": "favor", "cond": "!done:m15"}, {"text": "I can't stay long.", "next": "bye", "rel": {"amma": -3}}]}, "worry": {"who": "amma", "text": "Hmph. You are thinner than last time. Sit, sit.", "next": "hello2"}, "food": {"who": "amma", "text": "Always sambar. Take some home. And call your father once in a while.", "give": {"health": 100}, "next": "hello2"}, "hello2": {"who": "amma", "text": "So? What brings you home?", "choices": [{"text": "Anything you need done?", "next": "favor", "cond": "!done:m15"}, {"text": "Just visiting. Bye, Amma.", "next": "bye"}]}, "favor": {"who": "amma", "text": "Your father's old Ambassador has to reach Uncle Raju's garage before he closes. Your father is at the temple and you know he drives like a bullock cart. Can you take it? Don't scratch it.", "choices": [{"text": "Of course. I'll take it right now.", "next": "yes", "rel": {"amma": 6}, "event": "family:favor_accepted"}, {"text": "Maybe later.", "next": "bye", "rel": {"amma": -2}}]}, "yes": {"who": "amma", "text": "Keys are in the car outside. Uncle Raju closes soon, so go fast but carefully. And take this for petrol.", "give": {"cash": 200}, "end": true}, "bye": {"who": "amma", "text": "Go, go. Come for dinner on Sunday.", "end": true}}}, "karthik": {"start": "k1", "nodes": {"k1": {"who": "karthik", "text": "Machan! Heard you're doing big things now. Airport, metro, all that.", "choices": [{"text": "Just hustling. You?", "next": "k2", "rel": {"karthik": 3}}, {"text": "Keep it quiet around Amma.", "next": "k3", "rel": {"karthik": 1}}]}, "k2": {"who": "karthik", "text": "Engineering exams. Again. If you're flying out of Meenambakkam, tell Priya at check-in I said hi.", "end": true}, "k3": {"who": "karthik", "text": "My lips are sealed. For a coffee at Selvi's, maybe.", "end": true}}}, "selvi": {"start": "s1", "nodes": {"s1": {"who": "selvi", "text": "Vanakkam! Filter coffee, strong, less sugar? Or are you here for the other business?", "choices": [{"text": "Filter coffee, please.", "next": "coffee", "rel": {"selvi": 2}}, {"text": "A masala dosa.", "next": "dosa", "rel": {"selvi": 2}}, {"text": "What other business?", "next": "work"}, {"text": "Just looking.", "end": true}]}, "coffee": {"who": "selvi", "text": "Here. Hot like the afternoon on Mount Road.", "give": {"health": 15, "cash": -5}, "end": true}, "dosa": {"who": "selvi", "text": "Crispy, just how you like it.", "give": {"health": 40, "cash": -12}, "end": true}, "work": {"who": "selvi", "text": "Anand drops packages on the metro for people who pay well. If you want in, find his marker. He hates people who are late.", "rel": {"selvi": 1}, "end": true}}}}};
 // ===================== CORE: math, storage, input (keyboard, mouse, PS4/PS5 pad), audio =====================
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -287,8 +362,9 @@ const pressed = new Set();
 const mouse = { dx: 0, dy: 0, down: false, right: false, clicked: false, lastMove: 0, wheel: 0 };
 const GAME_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab']);
 let inputEnabled = false;
+const typing = e => e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
 addEventListener('keydown', e => {
-  if (!inputEnabled) return;
+  if (!inputEnabled || typing(e)) return;
   if (GAME_KEYS.has(e.code)) e.preventDefault();
   if (!keys.has(e.code)) pressed.add(e.code);
   keys.add(e.code);
@@ -380,6 +456,7 @@ const In = {
       case 'rides': return hit('KeyT') || gpHit(BTN.DOWN);
       case 'flip': return hit('KeyR') || gpHit(BTN.O);
       case 'phone': return hit('KeyI') || gpHit(BTN.SHARE);
+      case 'gear': return hit('KeyG') || gpHit(BTN.L3);
     }
     return false;
   },
@@ -495,6 +572,56 @@ const Sound = {
   fail() { [392, 330, 262].forEach((f, i) => this.tone(f, 0.45, 'sawtooth', 0.12, i * 0.18)); },
   star() { this.tone(988, 0.15, 'square', 0.08); this.tone(740, 0.2, 'square', 0.08, 0.12); },
 };
+
+// ===================== ARCHITECTURE: event bus, collision layers, system registry, trigger volumes =====================
+// The web build mirrors a Unity-style component architecture (see docs/ARCHITECTURE.md):
+//   EventBus  ~ C# events / ScriptableObject event channels (observer pattern, no hard references between systems)
+//   Systems   ~ MonoBehaviour Update() loops, registered and ticked in priority order by the main loop
+//   Layers    ~ Unity physics layers (Default, Road, Obstacle, Interactable)
+//   Triggers  ~ trigger colliders (OnTriggerEnter/Exit) that raise events and show interaction prompts
+const EventBus = {
+  _h: new Map(), log: [],
+  on(name, fn) { let a = this._h.get(name); if (!a) { a = []; this._h.set(name, a); } a.push(fn); return () => this.off(name, fn); },
+  once(name, fn) { const off = this.on(name, (...a) => { off(); fn(...a); }); return off; },
+  off(name, fn) { const a = this._h.get(name); if (!a) return; const i = a.indexOf(fn); if (i >= 0) a.splice(i, 1); },
+  emit(name, data = {}) {
+    this.log.push([name, performance.now()]); if (this.log.length > 200) this.log.shift();
+    const a = this._h.get(name); if (a) for (const fn of a.slice()) { try { fn(data, name); } catch (e) { console.error('EventBus handler for ' + name, e); } }
+    const any = this._h.get('*'); if (any) for (const fn of any.slice()) { try { fn(data, name); } catch (e) { console.error(e); } }
+  },
+};
+// physics layers: every collider in the world is tagged with one of these
+const Layers = Object.freeze({ Default: 0, Road: 1, Obstacle: 2, Interactable: 3, Curb: 4, Water: 5 });
+const LAYER_NAMES = Object.keys(Layers);
+const Systems = {
+  list: [],
+  register(name, sys, priority = 50) { sys.name = name; sys.priority = priority; this.list.push(sys); this.list.sort((a, b) => a.priority - b.priority); return sys; },
+  init() { for (const s of this.list) if (s.init && !s._inited) { s._inited = true; try { s.init(); } catch (e) { console.error('System init ' + s.name, e); } } },
+  update(dt) { for (const s of this.list) if (s.update && s.enabled !== false) s.update(dt); },
+  get(name) { return this.list.find(s => s.name === name); },
+};
+// trigger volumes (circles in the XZ plane, optionally restricted to an interior and a height band)
+const Triggers = {
+  list: [], inside: new Set(),
+  add(t) { t.layer = Layers.Interactable; t.r = t.r || 2; this.list.push(t); return t; },
+  remove(t) { const i = this.list.indexOf(t); if (i >= 0) this.list.splice(i, 1); this.inside.delete(t); },
+  // world position test: interior triggers use the interior type, street triggers use null
+  update(px, py, pz, interiorType) {
+    let prompted = null;
+    for (const t of this.list) {
+      if (t.enabled === false || (t.interior || null) !== (interiorType || null)) { if (this.inside.has(t)) { this.inside.delete(t); if (t.onExit) t.onExit(); } continue; }
+      const d = Math.hypot(px - t.x, pz - t.z), inY = t.y === undefined || Math.abs(py - t.y) < (t.hy || 3);
+      const now = d < t.r && inY;
+      if (now && !this.inside.has(t)) { this.inside.add(t); EventBus.emit('trigger:enter', { id: t.id }); if (t.onEnter) t.onEnter(); }
+      else if (!now && this.inside.has(t)) { this.inside.delete(t); EventBus.emit('trigger:exit', { id: t.id }); if (t.onExit) t.onExit(); }
+      if (now && t.prompt && !prompted) { const txt = typeof t.prompt === 'function' ? t.prompt() : t.prompt; if (txt) { prompted = t; promptAction(t.key || 'interact', txt); if (t.onUse && In.act(t.key || 'interact')) { t.onUse(); EventBus.emit('trigger:use', { id: t.id }); } } }
+    }
+    return prompted;
+  },
+};
+// key labels for contextual prompts: "[F] Enter Vehicle", "[E] Interact"
+const ACTION_KEYS = { interact: ['E', '→'], enter: ['F', '△'], gear: ['G', 'L3'], rides: ['T', 'D-pad ↓'] };
+function promptAction(action, text) { const k = ACTION_KEYS[action] || ['E', '→']; prompt(`${key(k[0], k[1])} ${text}`); }
 
 // ===================== PROCEDURAL TEXTURES: facade atlas, roads, billboards =====================
 // Facade atlas: 4x4 tiles of 512px. Façade tiles = 3 bays x 2 floors; shop tiles = 3 bays x 1 floor.
@@ -703,6 +830,255 @@ function makeBillboardAtlas() {
   }, false);
 }
 
+// ===================== ASSETS: Blender-built GLB models (tools/blender/build_assets.py) =====================
+// Every model is optional: if a file fails to load the game keeps its procedural geometry for that object.
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const Assets = {
+  files: ['airliner', 'plane', 'heli', 'metro_front', 'metro_coach', 'car_super', 'palm', 'neem'],
+  gltf: {}, paintCache: new Map(), loaded: false,
+  // vehicle type -> model name
+  VEHICLE: { airliner: 'airliner', plane: 'plane', heli: 'heli', policeheli: 'heli', super: 'car_super' },
+  async load(onProgress) {
+    const loader = new GLTFLoader(); let n = 0;
+    await Promise.all(this.files.map(name => new Promise(res => {
+      loader.load('assets/' + name + '.glb', g => {
+        g.scene.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material) o.material.envMapIntensity = 1.2; } });
+        this.gltf[name] = g.scene; n++; if (onProgress) onProgress(n / this.files.length); res();
+      }, undefined, err => { console.warn('asset ' + name + ' not loaded, using procedural fallback', err && err.message); n++; res(); });
+    })));
+    this.loaded = true;
+    EventBus.emit('assets:loaded', { count: Object.keys(this.gltf).length });
+  },
+  has(name) { return !!this.gltf[name]; },
+  // per-vehicle clone with its own paint colour; returns handles the game animates
+  vehicleModel(type, hex) {
+    const name = this.VEHICLE[type]; if (!name || !this.gltf[name]) return null;
+    const root = this.gltf[name].clone(true);
+    const out = { root, gear: null, prop: null, rotor: null, doors: [], head: [], tail: [] };
+    root.traverse(o => {
+      if (o.name === 'Gear') out.gear = o; else if (o.name === 'Prop') out.prop = o; else if (o.name === 'Rotor') out.rotor = o;
+      else if (/^Door[LR]\d$/.test(o.name)) out.doors.push(o);
+      if (!o.isMesh) return;
+      const mn = o.material && o.material.name;
+      if (mn === 'Paint' && hex !== undefined) o.material = this.paint(hex, o.material);
+      else if (mn === 'Headlights') { o.material = o.material.clone(); out.head.push(o.material); }
+      else if (mn === 'Taillights') { o.material = o.material.clone(); out.tail.push(o.material); }
+    });
+    return out;
+  },
+  paint(hex, base) {
+    let m = this.paintCache.get(hex);
+    if (!m) { m = base.clone(); m.color.setHex(hex); this.paintCache.set(hex, m); }
+    return m;
+  },
+  // metro coach clone with sliding-door handles (base positions remembered)
+  coach(front) {
+    const g = this.gltf[front ? 'metro_front' : 'metro_coach']; if (!g) return null;
+    const root = g.clone(true); const doors = [];
+    root.traverse(o => { if (/^Door[LR]\d$/.test(o.name)) { o.userData.z0 = o.position.z; doors.push(o); } });
+    return { root, doors };
+  },
+  // one merged, vertex-free geometry per material name (for instancing trees)
+  mergedByMaterial(name) {
+    const g = this.gltf[name]; if (!g) return null;
+    g.updateMatrixWorld(true);
+    const parts = {};
+    g.traverse(o => {
+      if (!o.isMesh) return;
+      let geo = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+      geo.applyMatrix4(o.matrixWorld);
+      for (const a of Object.keys(geo.attributes)) if (a !== 'position' && a !== 'normal') geo.deleteAttribute(a);
+      (parts[o.material.name] = parts[o.material.name] || []).push(geo);
+    });
+    const out = {}; for (const k in parts) out[k] = mergeGeometries(parts[k]);
+    return out;
+  },
+};
+
+// ===================== WORLD FIX-UP PASS (runs on the raw map data before the city is built) =====================
+// The raw OpenStreetMap tiles are not shipped, so geometry problems are corrected at load time:
+//  * rail: junction heights unified, grades limited to 4 %, viaducts that ended in mid-air ramp down into tunnel portals
+//  * roads: dead ends that stop a few metres short of another road are stitched with short connector edges
+//  * airport: buildings / trees / lamp posts inside runway, taxiway and apron safety zones are removed; perimeter fence
+//  * rail corridor: buildings standing on the tracks are removed
+const WorldFix = {
+  stats: {}, dropB: new Set(), portals: [], airZones: [], fence: [], dropoff: null,
+  RAIL_GRADE: 0.04, PORTAL_DEPTH: -7.5,
+  apply(WD) {
+    const t0 = performance.now();
+    this.bounds = WD.meta.bounds.map(v => v / 10);
+    this.fixRails(WD); this.stitchRoads(WD); this.airport(WD); this.clearCorridors(WD);
+    this.stats.ms = Math.round(performance.now() - t0);
+    EventBus.emit('world:fixed', this.stats);
+    if (window.__memlog) console.log('WorldFix', JSON.stringify(this.stats));
+  },
+  nearBoundary(x, z, m = 60) { const [a, b, c, d] = this.bounds; return x < a + m || x > c - m || z < b + m || z > d - m; },
+  // ---------------- rail profile ----------------
+  fixRails(WD) {
+    const R = WD.rails; let unified = 0, portals = 0, limited = 0;
+    const C = 10, grid = new Map(), key = (x, z) => Math.floor(x / C) + ',' + Math.floor(z / C);
+    R.forEach((r, li) => { for (let k = 0; k < r.p.length / 2; k++) { const kk = key(r.p[k * 2] / 10, r.p[k * 2 + 1] / 10); (grid.get(kk) || grid.set(kk, []).get(kk)).push([li, k]); } });
+    const neighbours = (li, x, z) => { const out = []; const ix = Math.floor(x / C), iz = Math.floor(z / C); for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const [lj, k] of grid.get((ix + a) + ',' + (iz + b)) || []) { if (lj === li) continue; const r = R[lj]; if (Math.hypot(r.p[k * 2] / 10 - x, r.p[k * 2 + 1] / 10 - z) < 4) out.push(r.h[k] / 10); } return out; };
+    // twin tracks: a line whose heights were never recorded (all ~0) but runs right alongside an elevated line is lifted onto the deck
+    const SC = 20, sgrid = new Map(); let twins = 0;
+    R.forEach((r, li) => { for (let k = 0; k < r.p.length / 2 - 1; k++) { if (r.h[k] < 30 && r.h[k + 1] < 30) continue; const x = r.p[k * 2] / 10, z = r.p[k * 2 + 1] / 10, kk = Math.floor(x / SC) + ',' + Math.floor(z / SC); (sgrid.get(kk) || sgrid.set(kk, []).get(kk)).push([li, k]); } });
+    const deckAt = (li, x, z) => { let best = null, bd = 9; const ix = Math.floor(x / SC), iz = Math.floor(z / SC);
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const [lj, k] of sgrid.get((ix + a) + ',' + (iz + b)) || []) { if (lj === li) continue; const o = R[lj], ax = o.p[k * 2] / 10, az = o.p[k * 2 + 1] / 10, bx = o.p[k * 2 + 2] / 10, bz = o.p[k * 2 + 3] / 10, dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz; let t = L2 ? ((x - ax) * dx + (z - az) * dz) / L2 : 0; t = clamp(t, 0, 1); const d = Math.hypot(x - ax - dx * t, z - az - dz * t); if (d < bd) { bd = d; best = (o.h[k] + (o.h[k + 1] - o.h[k]) * t) / 10; } }
+      return best; };
+    R.forEach((r, li) => {
+      const n = r.p.length / 2; if (Math.max(...r.h) > 30) return;   // lines already above 3 m keep their own profile
+      const lift = []; let hits = 0; for (let k = 0; k < n; k++) { const h = deckAt(li, r.p[k * 2] / 10, r.p[k * 2 + 1] / 10); lift.push(h); if (h !== null && h > 3) hits++; }
+      const len = r.L || 1e9; if (hits < Math.max(2, n * (len < 400 ? 0.3 : 0.5))) return;   // short crossovers / sidings sit alongside the deck for part of their length
+      for (let k = 0; k < n; k++) if (lift[k] !== null && lift[k] > 1) r.h[k] = Math.round(lift[k] * 10);
+      twins++;
+    });
+    this.stats.railTwinTracksLifted = twins;
+    for (let li = 0; li < R.length; li++) {
+      const r = R[li], n = r.p.length / 2, P = [], H = [];
+      for (let k = 0; k < n; k++) { P.push([r.p[k * 2] / 10, r.p[k * 2 + 1] / 10]); H.push(r.h[k] / 10); }
+      const fixed = new Array(n).fill(false);
+      for (const k of [0, n - 1]) {
+        const [x, z] = P[k], nb = neighbours(li, x, z);
+        if (nb.length) {
+          // a junction: take the height of the connecting track that best continues this line (ignore lines it merely passes under/over)
+          const adj = H[k === 0 ? Math.min(1, n - 1) : Math.max(0, n - 2)];
+          const pickH = [H[k], ...nb].reduce((b, h) => Math.abs(h - adj) < Math.abs(b - adj) ? h : b, H[k]);
+          if (Math.abs(pickH - H[k]) > 0.5) { H[k] = pickH; unified++; } fixed[k] = true;
+        }
+        else if (H[k] > 1 && !this.nearBoundary(x, z)) {
+          const deck = deckAt(li, x, z);
+          if (deck !== null && deck > 3) { H[k] = deck; fixed[k] = true; unified++; }        // ends beside a viaduct: stay on the deck
+          else { H[k] = this.PORTAL_DEPTH; fixed[k] = true; portals++; this.portals.push({ li, k, x, z }); }
+        }
+      }
+      // grade limit: only lower the high side, so portals and junction heights are kept
+      const cum = [0]; for (let k = 1; k < n; k++) cum.push(cum[k - 1] + Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]));
+      for (let pass = 0; pass < 2; pass++) {
+        for (let k = 1; k < n; k++) { const lim = H[k - 1] + this.RAIL_GRADE * (cum[k] - cum[k - 1]); if (H[k] > lim + 1e-3 && !(fixed[k] && H[k] > 0)) { H[k] = lim; limited++; } }
+        for (let k = n - 2; k >= 0; k--) { const lim = H[k + 1] + this.RAIL_GRADE * (cum[k + 1] - cum[k]); if (H[k] > lim + 1e-3 && !(fixed[k] && H[k] > 0)) { H[k] = lim; limited++; } }
+      }
+      // raise pass: low track next to a fixed high point (junction with a viaduct) climbs to it at the same grade
+      for (let k = 0; k < n; k++) if (fixed[k] && H[k] > 0) for (let j = 0; j < n; j++) { const up = H[k] - this.RAIL_GRADE * Math.abs(cum[j] - cum[k]); if (up > H[j] + 1e-3) { H[j] = up; limited++; } }
+      // the stored polyline is coarse: densify long sloped segments so trains and decks follow the ramp smoothly
+      const np = [], nh = [];
+      for (let k = 0; k < n; k++) {
+        np.push(r.p[k * 2], r.p[k * 2 + 1]); nh.push(Math.round(H[k] * 10));
+        if (k < n - 1 && Math.abs(H[k + 1] - H[k]) > 0.8) { const seg = cum[k + 1] - cum[k], m = Math.min(24, Math.floor(seg / 12)); for (let j = 1; j < m; j++) { const t = j / m; np.push(Math.round(r.p[k * 2] + (r.p[k * 2 + 2] - r.p[k * 2]) * t), Math.round(r.p[k * 2 + 1] + (r.p[k * 2 + 3] - r.p[k * 2 + 1]) * t)); nh.push(Math.round((H[k] + (H[k + 1] - H[k]) * t) * 10)); } }
+      }
+      r.p = np; r.h = nh;
+    }
+    for (const p of this.portals) { const r = R[p.li], n = r.p.length / 2, k = p.k === 0 ? 0 : n - 1; p.x = r.p[k * 2] / 10; p.z = r.p[k * 2 + 1] / 10; p.end = p.k !== 0; }
+    Object.assign(this.stats, { railJunctionsUnified: unified, railTunnelPortals: portals, railGradeFixes: limited });
+  },
+  // ---------------- road gaps ----------------
+  stitchRoads(WD) {
+    const enc = WD.meta.delta, und = p => { if (!enc) return p; const o = p.slice(); for (let i = 2; i < o.length; i++) o[i] += o[i - 2]; return o; };
+    const enco = p => { if (!enc) return p; const o = p.slice(); for (let i = o.length - 1; i >= 2; i--) o[i] -= o[i - 2]; return o; };
+    const E = WD.edges, N = WD.nodes, deg = new Uint16Array(N.length), dec = E.map(e => und(e.p));
+    for (const e of E) { deg[e.a]++; deg[e.b]++; }
+    const C = 20, grid = new Map(), key = (x, z) => Math.floor(x / C) + ',' + Math.floor(z / C);
+    E.forEach((e, i) => { if (e.c > 3 || e.h) return; const p = dec[i]; for (let k = 0; k < p.length / 2; k++) { const kk = key(p[k * 2] / 10, p[k * 2 + 1] / 10); (grid.get(kk) || grid.set(kk, []).get(kk)).push([i, k]); } });
+    const replaced = new Set(); let stitched = 0, split = 0;
+    const nE = E.length;
+    for (let ni = 0; ni < N.length; ni++) {
+      if (deg[ni] !== 1) continue;
+      const x = N[ni][0] / 10, z = N[ni][1] / 10; if (this.nearBoundary(x, z, 40)) continue;
+      // own edge + its outward direction at this dead end
+      let oi = -1; for (const kk of [key(x, z)]) for (const [i] of grid.get(kk) || []) { const e = E[i]; if (e.a === ni || e.b === ni) { oi = i; break; } }
+      if (oi < 0 || replaced.has(oi)) continue;
+      const oe = E[oi], op = dec[oi], m = op.length / 2, atA = oe.a === ni;
+      const px = op[(atA ? 1 : m - 2) * 2] / 10, pz = op[(atA ? 1 : m - 2) * 2 + 1] / 10; let dx = x - px, dz = z - pz; const dl = Math.hypot(dx, dz) || 1; dx /= dl; dz /= dl;
+      let best = null, bd = 8;
+      const ix = Math.floor(x / C), iz = Math.floor(z / C);
+      for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) for (const [i, k] of grid.get((ix + a) + ',' + (iz + b)) || []) {
+        if (i === oi || replaced.has(i)) continue; const e = E[i]; if (e.a === ni || e.b === ni || e.a === (atA ? oe.b : oe.a) || e.b === (atA ? oe.b : oe.a)) continue;
+        const vx = dec[i][k * 2] / 10, vz = dec[i][k * 2 + 1] / 10, d = Math.hypot(vx - x, vz - z);
+        if (d < 0.5 || d >= bd) continue; if (((vx - x) * dx + (vz - z) * dz) / d < 0.3) continue;   // must continue the road, not jump sideways
+        bd = d; best = [i, k, vx, vz];
+      }
+      if (!best) continue;
+      const [fi, k, vx, vz] = best, fe = E[fi], fp = dec[fi], fm = fp.length / 2;
+      let target;
+      if (k === 0) target = fe.a; else if (k === fm - 1) target = fe.b;
+      else { // split the other edge at vertex k
+        target = N.length; N.push([fp[k * 2], fp[k * 2 + 1], 0]); split++;
+        const p1 = fp.slice(0, (k + 1) * 2), p2 = fp.slice(k * 2);
+        const e2 = Object.assign({}, fe, { a: target, b: fe.b, p: enco(p2) }); delete e2.h;
+        fe.b = target; fe.p = enco(p1); dec[fi] = p1; replaced.add(fi); E.push(e2); dec.push(p2);
+      }
+      E.push({ a: ni, b: target, p: enco([N[ni][0], N[ni][1], Math.round(vx * 10), Math.round(vz * 10)]), w: Math.min(oe.w, fe.w), c: Math.max(oe.c, fe.c), o: 0, n: oe.n, t: oe.t && fe.t ? 1 : 0, fx: 1 });
+      dec.push(null); deg[ni]++; stitched++;
+    }
+    Object.assign(this.stats, { roadGapsStitched: stitched, roadEdgesSplit: split, roadEdgesBefore: nE, roadEdgesAfter: E.length });
+  },
+  // ---------------- airport ----------------
+  airport(WD) {
+    const A = WD.air; if (!A) return;
+    const P = p => { const o = []; for (let i = 0; i < p.length; i += 2) o.push([p[i] / 10, p[i + 1] / 10]); return o; };
+    for (const r of A.runway) this.airZones.push({ kind: 'runway', P: P(r.p), hw: r.w / 20 + 30 });
+    for (const r of A.taxi) this.airZones.push({ kind: 'taxi', P: P(r.p), hw: r.w / 20 + 6 });
+    this.aprons = A.apron.map(a => { const pts = P(a.p); let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; for (const [x, z] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); } return { pts, x0, x1, z0, z1 }; });
+    let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+    for (const zn of this.airZones) for (const [x, z] of zn.P) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+    this.airBox = [x0 - 80, z0 - 80, x1 + 80, z1 + 80];
+    // perimeter fence: convex hull of the airside, pushed out 45 m
+    const pts = []; for (const zn of this.airZones) for (const p of zn.P) pts.push(p); for (const a of this.aprons) for (const p of a.pts) pts.push(p);
+    const hull = convexHull(pts); const [cx, cz] = centroid(hull);
+    this.fence = hull.map(([x, z]) => { const dx = x - cx, dz = z - cz, l = Math.hypot(dx, dz) || 1; return [x + dx / l * 45, z + dz / l * 45]; });
+    // nothing taller than grass inside the fence (obstacle-free infield); lamp posts only off the airside strips
+    const inFence = (x, z) => x > this.airBox[0] && x < this.airBox[2] && z > this.airBox[1] && z < this.airBox[3] && pointInPoly(x, z, hull);
+    const nt = WD.trees.length, nl = WD.lights.length;
+    WD.trees = WD.trees.filter(t => !inFence(t[0] / 10, t[1] / 10)); WD.lights = WD.lights.filter(t => !this.inAirside(t[0] / 10, t[1] / 10));
+    Object.assign(this.stats, { airportTreesRemoved: nt - WD.trees.length, airportLampsRemoved: nl - WD.lights.length });
+  },
+  inAirside(x, z, pad = 0) {
+    const b = this.airBox; if (!b || x < b[0] || x > b[2] || z < b[1] || z > b[3]) return false;
+    for (const zn of this.airZones) for (let i = 0; i < zn.P.length - 1; i++) if (segDist(x, z, zn.P[i][0], zn.P[i][1], zn.P[i + 1][0], zn.P[i + 1][1]) < zn.hw + pad) return true;
+    for (const a of this.aprons) if (x >= a.x0 && x <= a.x1 && z >= a.z0 && z <= a.z1 && pointInPoly(x, z, a.pts)) return true;
+    return false;
+  },
+  // ---------------- buildings on the tracks / airside ----------------
+  clearCorridors(WD) {
+    const enc = WD.meta.delta, C = 20, grid = new Map(), recs = [];
+    WD.buildings.forEach((b, i) => {
+      const p = b.p, o = []; let ax = 0, az = 0;
+      for (let k = 0; k < p.length; k += 2) { if (enc && k >= 2) { ax += p[k]; az += p[k + 1]; } else { ax = p[k]; az = p[k + 1]; } o.push([ax / 10, az / 10]); }
+      let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; for (const [x, z] of o) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+      const r = { i, o, x0, x1, z0, z1, h: b.h / 10 }; recs.push(r);
+      for (let ix = Math.floor(x0 / C); ix <= Math.floor(x1 / C); ix++) for (let iz = Math.floor(z0 / C); iz <= Math.floor(z1 / C); iz++) { const k = ix + ',' + iz; (grid.get(k) || grid.set(k, []).get(k)).push(r); }
+    });
+    const at = (x, z) => { const a = grid.get(Math.floor(x / C) + ',' + Math.floor(z / C)); if (!a) return null; for (const r of a) if (x >= r.x0 && x <= r.x1 && z >= r.z0 && z <= r.z1 && pointInPoly(x, z, r.o)) return r; return null; };
+    let rail = 0, air = 0;
+    for (const L of WD.rails) {
+      const n = L.p.length / 2;
+      for (let k = 0; k < n - 1; k++) {
+        const ax = L.p[k * 2] / 10, az = L.p[k * 2 + 1] / 10, bx = L.p[k * 2 + 2] / 10, bz = L.p[k * 2 + 3] / 10, len = Math.hypot(bx - ax, bz - az) || 1, tx = (bx - ax) / len, tz = (bz - az) / len;
+        for (let s = 0; s <= len; s += 3) {
+          const y = (L.h[k] + (L.h[k + 1] - L.h[k]) * s / len) / 10; if (y < -1) continue;
+          for (const o of [-2.2, 0, 2.2]) { const r = at(ax + tx * s + tz * o, az + tz * s - tx * o); if (r && !this.dropB.has(r.i) && y < r.h + 0.5) { this.dropB.add(r.i); rail++; } }
+        }
+      }
+    }
+    for (const r of recs) {
+      if (this.dropB.has(r.i)) continue; const b = this.airBox; if (!b || r.x1 < b[0] || r.x0 > b[2] || r.z1 < b[1] || r.z0 > b[3]) continue;
+      const [cx, cz] = centroid(r.o); const area = Math.abs(signedArea(r.o));
+      // terminals and hangars border the apron: only small structures that sit on the airside are removed
+      if (area < 4000 && (this.inAirside(cx, cz) || r.o.some(([x, z]) => this.inAirside(x, z, -2)))) { this.dropB.add(r.i); air++; }
+    }
+    Object.assign(this.stats, { buildingsOnRailRemoved: rail, buildingsOnAirsideRemoved: air });
+  },
+};
+function segDist(x, z, ax, az, bx, bz) { const dx = bx - ax, dz = bz - az, L2 = dx * dx + dz * dz; let t = L2 ? ((x - ax) * dx + (z - az) * dz) / L2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t; return Math.hypot(x - ax - dx * t, z - az - dz * t); }
+function convexHull(pts) {
+  const p = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]); if (p.length < 3) return p;
+  const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [], up = [];
+  for (const q of p) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+  for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+  lo.pop(); up.pop(); return lo.concat(up);
+}
+
 // ===================== WORLD: renderer, post-processing, materials, sky, spatial lookups =====================
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -759,6 +1135,7 @@ function buildComposer() {
   bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.35, 0.5, 0.92);
   composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
+  composer.addPass(makeGradePass());
   if (Q.post === 2) { smaaPass = new SMAAPass(size.x, size.y); composer.addPass(smaaPass); }
 }
 function renderFrame() { if (composer) composer.render(); else renderer.render(scene, camera); }
@@ -861,11 +1238,11 @@ float hh(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 
 };
 
 // ---------- sky ----------
-const skyUniforms = { top: { value: new THREE.Color(0x4f8fd6) }, hor: { value: new THREE.Color(0xd6e6ee) }, sunDir: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color(0xfff2d0) }, night: uNight, time: uTime };
+const skyUniforms = { top: { value: new THREE.Color(0x4f8fd6) }, hor: { value: new THREE.Color(0xd6e6ee) }, sunDir: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color(0xfff2d0) }, night: uNight, time: uTime, cloudy: { value: 0 }, storm: { value: 0 } };
 const skyMat = new THREE.ShaderMaterial({
   uniforms: skyUniforms, side: THREE.BackSide, depthWrite: false, fog: false,
   vertexShader: `varying vec3 vD; void main(){ vD = normalize(position); vec4 p = modelViewMatrix*vec4(position,1.0); gl_Position = projectionMatrix*p; gl_Position.z = gl_Position.w*0.99999; }`,
-  fragmentShader: `uniform vec3 top, hor, sunDir, sunCol; uniform float night, time; varying vec3 vD;
+  fragmentShader: `uniform vec3 top, hor, sunDir, sunCol; uniform float night, time, cloudy, storm; varying vec3 vD;
   float h1(vec3 p){ return fract(sin(dot(p, vec3(12.9898,78.233,45.164)))*43758.5453); }
   float hn(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
   float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(hn(i), hn(i+vec2(1,0)), f.x), mix(hn(i+vec2(0,1)), hn(i+vec2(1,1)), f.x), f.y); }
@@ -874,8 +1251,8 @@ const skyMat = new THREE.ShaderMaterial({
    if (d.y < 0.0) c = mix(hor, hor*0.6, clamp(-d.y*4.0,0.0,1.0));
    float s = max(dot(d, sunDir),0.0); c += sunCol*(pow(s,900.0)*4.0 + pow(s,12.0)*0.3 + pow(s,3.0)*0.08);
    if (d.y > 0.0) { vec2 uv = d.xz / (d.y + 0.12) * 1.4 + vec2(time*0.004, time*0.002);
-     float cl = smoothstep(0.52, 0.85, fbm(uv)); cl *= smoothstep(0.0, 0.25, d.y);
-     vec3 cc = mix(vec3(1.0,0.98,0.95), sunCol, 0.35) * (1.0 - night*0.85) + hor*0.25; c = mix(c, cc, cl*0.75); }
+     float cl = smoothstep(0.52 - cloudy * 0.42, 0.85 - cloudy * 0.3, fbm(uv)); cl *= smoothstep(0.0, 0.25, d.y);
+     vec3 cc = mix(vec3(1.0,0.98,0.95), sunCol, 0.35) * (1.0 - night*0.85) * (1.0 - storm * 0.6) + hor*0.25; c = mix(c, cc, cl*(0.75 + cloudy * 0.2)); }
    vec3 g = floor(d*420.0); float st = step(0.9965, h1(g))*night*smoothstep(0.05,0.4,y); c += vec3(st);
    gl_FragColor = vec4(c,1.0); }`
 });
@@ -991,6 +1368,7 @@ function addCullable(obj, maxD) {
 // ---------------- spatial lookups ----------------
 const BC = 16, bWallGrid = new Map(), bPolyGrid = new Map();
 let walls = new Float32Array(7 * 262144), nWalls = 0; // flat [ax,az,bx,bz,h,nx,nz] per wall, n = outward normal
+let wallLayer = new Uint8Array(262144);                  // Layers.* per wall (Obstacle for buildings, Curb for platform edges)
 const bPolys = [];
 const gkey = (ix, iz) => (ix + 1000) * 4096 + (iz + 1000);
 function gridAdd(grid, cell, x0, z0, x1, z1, val) {
@@ -1000,10 +1378,12 @@ function gridAdd(grid, cell, x0, z0, x1, z1, val) {
     const k = gkey(ix, iz); let a = grid.get(k); if (!a) { a = []; grid.set(k, a); } a.push(val);
   }
 }
-function addWallRing(pts, h) {
+function addWallRing(pts, h, layer = Layers.Obstacle, skip = null) {
   const A = signedArea(pts);
   for (let i = 0; i < pts.length; i++) {
     const p = pts[i], q = pts[(i + 1) % pts.length]; const dx = q[0] - p[0], dz = q[1] - p[1], l = Math.hypot(dx, dz); if (l < 0.01) continue;
+    if (skip && skip(p, q)) continue;
+    if (nWalls + 1 > wallLayer.length) { const g = new Uint8Array(wallLayer.length * 2); g.set(wallLayer); wallLayer = g; } wallLayer[nWalls] = layer;
     const nx = A > 0 ? dz / l : -dz / l, nz = A > 0 ? -dx / l : dx / l;
     if ((nWalls + 1) * 7 > walls.length) { const g = new Float32Array(walls.length * 2); g.set(walls); walls = g; } const wi = nWalls++, o = wi * 7; walls[o] = p[0]; walls[o + 1] = p[1]; walls[o + 2] = q[0]; walls[o + 3] = q[1]; walls[o + 4] = h; walls[o + 5] = nx; walls[o + 6] = nz; gridAdd(bWallGrid, BC, p[0], p[1], q[0], q[1], wi);
   }
@@ -1016,7 +1396,8 @@ function insideBuilding(x, z) {
 const _seen = new Set();
 const colRes = { x: 0, z: 0, nx: 0, nz: 0, hit: false, depth: 0 };
 // one-sided walls: they only push from outside, so nothing can get trapped inside a footprint
-function collideCircle(x, z, r, y = 0) {
+// stepH: walls on the Curb layer no higher than y + stepH are stepped over (people climb onto platforms)
+function collideCircle(x, z, r, y = 0, stepH = 0) {
   colRes.hit = false; colRes.nx = 0; colRes.nz = 0; colRes.depth = 0;
   for (let it = 0; it < 2; it++) {
     const ix0 = Math.floor((x - r) / BC), ix1 = Math.floor((x + r) / BC), iz0 = Math.floor((z - r) / BC), iz1 = Math.floor((z + r) / BC);
@@ -1026,6 +1407,7 @@ function collideCircle(x, z, r, y = 0) {
       for (const wi of a) {
         if (_seen.has(wi)) continue; _seen.add(wi);
         const wo = wi * 7; if (y > walls[wo + 4] + 0.3) continue;
+        if (stepH > 0 && wallLayer[wi] === Layers.Curb && walls[wo + 4] - y <= stepH) continue;
         const ax = walls[wo + 0], az = walls[wo + 1], dx = walls[wo + 2] - ax, dz = walls[wo + 3] - az;
         if ((x - ax) * walls[wo + 5] + (z - az) * walls[wo + 6] < 0) continue;
         const L2 = dx * dx + dz * dz; let t = L2 > 0 ? ((x - ax) * dx + (z - az) * dz) / L2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
@@ -1112,6 +1494,10 @@ function surfaceAt(x, z, curY) {
   }
   return surfRes;
 }
+// raised walkable surfaces (station platforms): height lookup for people on foot
+const walkPolys = [], walkGrid = new Map();
+function addWalkSurface(pts, h) { let minx = 1e9, maxx = -1e9, minz = 1e9, maxz = -1e9; for (const p of pts) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); minz = Math.min(minz, p[1]); maxz = Math.max(maxz, p[1]); } const i = walkPolys.length; walkPolys.push({ pts, h, minx, maxx, minz, maxz }); gridAdd(walkGrid, 40, minx, minz, maxx, maxz, i); }
+function walkSurfaceAt(x, z) { const a = walkGrid.get(gkey(Math.floor(x / 40), Math.floor(z / 40))); if (!a) return 0; for (const i of a) { const w = walkPolys[i]; if (x >= w.minx && x <= w.maxx && z >= w.minz && z <= w.maxz && pointInPoly(x, z, w.pts)) return w.h; } return 0; }
 const WC = 60, waterGrid = new Map(); const waterPolys = [];
 function inWater(x, z) {
   const a = waterGrid.get(gkey(Math.floor(x / WC), Math.floor(z / WC))); if (!a) return false;
@@ -1271,6 +1657,7 @@ function roadInside(pts, minx, minz, maxx, maxz, top) {
   return inside;
 }
 async function initWorld(progress) {
+  WorldFix.apply(WD);
   const enc = WD.meta.delta;
   // ---- graph ----
   for (const n of WD.nodes) G.nodes.push({ x: n[0] / 10, z: n[1] / 10, y: n[2] / 10, out: [], adj: [], edges: [] });
@@ -1329,7 +1716,7 @@ async function initWorld(progress) {
     const g = new THREE.ExtrudeGeometry(s, { depth: 0.95, bevelEnabled: false }); g.rotateX(-Math.PI / 2);
     const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 0.25, uv.getY(i) * 0.25);
     const m = new THREE.Mesh(g, M.platform); m.receiveShadow = true; scene.add(m);
-    addWallRing(toPts(d.p), 0.95);
+    addWallRing(toPts(d.p), 0.95, Layers.Curb); addWalkSurface(toPts(d.p), 0.95);
   }
   buildRails(); buildAirport(); buildPiers();
   progress(0.3, 'Surveying 130,000 buildings…'); await tick();
@@ -1339,6 +1726,7 @@ async function initWorld(progress) {
   let bi = 0, droppedB = 0, openB = 0;
   for (const b of WD.buildings) {
     bi++;
+    if (WorldFix.dropB.has(bi - 1)) { droppedB++; continue; }
     if (bi % 20000 === 0) { progress(0.3 + 0.35 * bi / WD.buildings.length, `Surveying buildings ${bi.toLocaleString()} / ${WD.buildings.length.toLocaleString()}…`); await tick(); }
     const pp = undelta(b.p, enc);
     let pts = toPts(pp); if (pts.length < 3) continue;
@@ -1352,7 +1740,8 @@ async function initWorld(progress) {
     for (const p of pts) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); minz = Math.min(minz, p[1]); maxz = Math.max(maxz, p[1]); }
     // a road runs through this footprint (canopies, misaligned outlines, terminal forecourts): never let it block traffic
     const onRoad = roadInside(pts, minx, minz, maxx, maxz, hh);
-    if (onRoad >= 2.5) { if (area < 2500 || h < 9) { droppedB++; continue; } openB++; }
+    // big structures with a road through them (terminal forecourts, gateways) keep every wall except where the road passes
+    if (onRoad >= 2.5) { if (area < 2500 || h < 9) { droppedB++; continue; } openB++; addWallRing(pts, hh, Layers.Obstacle, wallCrossedByRoad); }
     else addWallRing(pts, hh);
     const pi = bPolys.length; bPolys.push({ pts, minx, maxx, minz, maxz, h: hh, name: b.n || '', A, cx, cz, area });
     gridAdd(bPolyGrid, BC, minx, minz, maxx, maxz, pi);
@@ -1373,6 +1762,11 @@ async function initWorld(progress) {
   progress(0.72, 'Laying the city around you…'); await tick();
 }
 
+function wallCrossedByRoad(p, q) {
+  const L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = Math.max(2, Math.ceil(L / 2));
+  for (let j = 0; j <= n; j++) { const t = j / n, r = roadQuery(p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t, 10); if (r.seg && r.d < 1.5 && !(r.seg.elev && r.y > 3)) return true; }
+  return false;
+}
 // ---------- chunk streaming ----------
 const RNEAR = 520, RFAR = 1350;
 let streamBudget = 0;
@@ -1460,7 +1854,7 @@ function buildNear(c) {
         }
       }
     }
-    if (E.br && !E.elev && E.len < 260) { const rr = ribbon(new GeoBuf(false), E.xs, E.zs, E.ys, hw, hw, 0); _col.setHex(0xcfc8ba); if (rr) { vwall(cb, rr.L, 0, 0.95); vwall(cb, rr.R, 0, 0.95); } }
+    if (E.br && !E.elev) { const rr = ribbon(new GeoBuf(false), E.xs, E.zs, E.ys, hw, hw, 0); _col.setHex(0xcfc8ba); if (rr) { vwall(cb, rr.L, 0, 0.95); vwall(cb, rr.R, 0, 0.95); } }
     if (!E.elev && E.c <= 2 && hw >= 3.2 && E.len - trimA - trimB > 12) {
       const s0 = trimA + 3, s1 = E.len - trimB - 3;
       const lanes = E.o === 0 ? [0] : [];
@@ -1612,7 +2006,12 @@ function initTreeGeos() {
   const fronds = [];
   for (let i = 0; i < 8; i++) { const f = new THREE.PlaneGeometry(0.9, 4.4, 1, 3); const pa = f.attributes.position; for (let k = 0; k < pa.count; k++) { const yy = pa.getY(k) + 2.2; pa.setY(k, yy); pa.setZ(k, -yy * yy * 0.06); } f.rotateX(0.9); f.rotateY(i / 8 * TAU); f.translate(0, 8.4, 0); fronds.push(f); }
   const frondG = mergeGeometries(fronds); frondG.computeVertexNormals();
-  TREE_G = { trunkG, canG, pTrunkG, frondG, greens: [0x4f7d33, 0x5d8c3a, 0x3f6b2c, 0x6c9a45, 0x7a8f3a, 0x4a7a3c, 0x58803a, 0x6a8e2e].map(h => new THREE.Color(h)) };
+  // prefer the Blender-built neem / palm models
+  const neem = Assets.mergedByMaterial('neem'), palm = Assets.mergedByMaterial('palm');
+  const T_ = { trunkG, canG, pTrunkG, frondG };
+  if (neem && neem.Trunk && neem.Leaf) { T_.trunkG = neem.Trunk; T_.canG = neem.Leaf; }
+  if (palm && palm.Trunk && palm.Leaf) { T_.pTrunkG = palm.Trunk; T_.frondG = palm.Coconut ? mergeGeometries([palm.Leaf, palm.Coconut]) : palm.Leaf; }
+  TREE_G = { trunkG: T_.trunkG, canG: T_.canG, pTrunkG: T_.pTrunkG, frondG: T_.frondG, greens: [0x4f7d33, 0x5d8c3a, 0x3f6b2c, 0x6c9a45, 0x7a8f3a, 0x4a7a3c, 0x58803a, 0x6a8e2e].map(h => new THREE.Color(h)) };
 }
 function buildTreesFor(c) {
   const trees = c.trees.filter(t => !t[3]), palms = c.trees.filter(t => t[3]);
@@ -1676,16 +2075,63 @@ function buildRails() {
   if (!railB.empty) { const m = new THREE.Mesh(railB.geometry(), M.ballast); m.receiveShadow = true; scene.add(m); }
   if (!steel.empty) scene.add(new THREE.Mesh(steel.geometry(), M.rail));
   if (!via.empty) { const m = new THREE.Mesh(via.geometry(), M.concrete); m.castShadow = true; m.receiveShadow = true; scene.add(m); }
-  // stations along each line
+  // stations along each line (names kept for the metro system)
   for (const L of railLines) {
+    L.stopMeta = [];
     for (const p of G.pois) {
       if (p.t !== 'station' && p.t !== 'metro') continue;
       let best = 1e9, bs = 0;
       for (let k = 0; k < L.xs.length; k++) { const d = dist2(L.xs[k], L.zs[k], p.x, p.z); if (d < best) { best = d; bs = L.cum[k]; } }
-      if (best < 90 * 90 && !L.stops.some(s => Math.abs(s - bs) < 300)) L.stops.push(bs);
+      if (best < 90 * 90 && !L.stops.some(s => Math.abs(s - bs) < 300)) { L.stops.push(bs); const rp = railPoint(L, bs); L.stopMeta.push({ s: bs, name: p.n || 'Station', metro: p.t === 'metro', x: rp.x, y: rp.y - 0.15, z: rp.z, px: p.x, pz: p.z }); }
     }
-    L.stops.sort((a, b) => a - b);
+    L.stops.sort((a, b) => a - b); L.stopMeta.sort((a, b) => a.s - b.s);
   }
+  buildPortals(); buildElevatedStations();
+}
+// tunnel portal hoods where a line dips below ground (WorldFix ramps dangling viaducts into these)
+function buildPortals() {
+  const pb = new GeoBuf(true); const conc = new THREE.Color(0xa7a197), dark = new THREE.Color(0x07080a); let n = 0;
+  for (const L of railLines) for (let k = 0; k < L.xs.length - 1; k++) {
+    const y0 = L.ys[k], y1 = L.ys[k + 1]; if ((y0 >= 0) === (y1 >= 0)) continue;
+    const t = y0 / (y0 - y1), x = L.xs[k] + (L.xs[k + 1] - L.xs[k]) * t, z = L.zs[k] + (L.zs[k + 1] - L.zs[k]) * t;
+    let tx = L.xs[k + 1] - L.xs[k], tz = L.zs[k + 1] - L.zs[k]; const tl = Math.hypot(tx, tz) || 1; tx /= tl; tz /= tl; if (y1 > y0) { tx = -tx; tz = -tz; }  // point into the tunnel
+    const rot = Math.atan2(tx, tz), cx = x + tx * 16, cz = z + tz * 16;
+    boxTo(pb, cx, 3.2, cz, 8.4, 6.4, 32, rot, conc);                                   // hood over the cutting
+    boxTo(pb, x - tx * 0.08, 2.6, z - tz * 0.08, 5.6, 5.0, 0.12, rot, dark);            // dark tunnel mouth
+    boxTo(pb, x - tx * 0.3, 6.6, z - tz * 0.3, 9.6, 0.8, 0.6, rot, conc);              // headwall lip
+    for (const sd of [-1, 1]) boxTo(pb, x - tx * 6 + tz * sd * 4.6, 0.7, z - tz * 6 - tx * sd * 4.6, 0.6, 1.4, 12, rot, conc);  // wing walls
+    const hx = 4.2, hz = 16, c = Math.cos(rot), s2 = Math.sin(rot), P = (lx, lz) => [cx + lx * c + lz * s2, cz - lx * s2 + lz * c];
+    addWallRing([P(-hx, -hz), P(hx, -hz), P(hx, hz), P(-hx, hz)], 6.4, Layers.Obstacle, wallCrossedByRoad); n++;
+  }
+  if (!pb.empty) { const m = new THREE.Mesh(pb.geometry(), M.vcol); m.castShadow = m.receiveShadow = true; scene.add(m); }
+  WorldFix.stats.portalHoodsBuilt = n;
+}
+// metro stations on viaducts: side platforms at deck level, canopy roof, columns and a stair tower
+function buildElevatedStations() {
+  const sb = new GeoBuf(true); const plat = new THREE.Color(0xc9c3b6), roof = new THREE.Color(0x2f6fb5), col = new THREE.Color(0xb2ab9e), glass = new THREE.Color(0x9fc4dc); let n = 0;
+  const built = [];
+  for (const L of railLines) for (const st of L.stopMeta) {
+    if (st.y < 3.5) continue;
+    const twin = built.find(b => dist2(b.x, b.z, st.x, st.z) < 70 * 70);   // parallel tracks share one station
+    if (twin) { st.elevated = true; st.rot = twin.rot; continue; }
+    built.push(st);
+    const a = railPoint(L, st.s - 5), b = railPoint(L, st.s + 5); const rot = Math.atan2(b.x - a.x, b.z - a.z), tx = Math.sin(rot), tz = Math.cos(rot);
+    st.elevated = true; st.rot = rot; n++; built[built.length - 1].rot = rot;
+    for (const sd of [-1, 1]) {
+      const ox = tz * sd * 3.9, oz = -tx * sd * 3.9;
+      boxTo(sb, st.x + ox, st.y + 0.45, st.z + oz, 3.6, 1.0, 130, rot, plat);                      // platform slab
+      boxTo(sb, st.x + ox * 1.48, st.y + 1.6, st.z + oz * 1.48, 0.15, 1.3, 130, rot, glass);        // glass parapet
+      for (let k = -60; k <= 60; k += 15) boxTo(sb, st.x + ox * 1.42 + tx * k, st.y + 3.6, st.z + oz * 1.42 + tz * k, 0.3, 5.4, 0.3, 0, col);
+    }
+    boxTo(sb, st.x, st.y + 6.5, st.z, 14, 0.45, 136, rot, roof);                                   // canopy
+    boxTo(sb, st.x, st.y + 6.95, st.z, 9, 0.5, 120, rot, new THREE.Color(0xe9ecef));
+    for (let k = -50; k <= 50; k += 25) boxTo(sb, st.x + tx * k, (st.y - 0.6) / 2, st.z + tz * k, 2.2, st.y - 0.6, 2.2, rot, col);   // concourse piers
+    boxTo(sb, st.x, st.y - 2.2, st.z, 18, 3.2, 60, rot, new THREE.Color(0xd8d2c4));                // concourse box under the deck
+    const sx = st.x + Math.cos(rot) * 11, sz = st.z - Math.sin(rot) * 11;
+    boxTo(sb, sx, st.y / 2, sz, 4.5, st.y, 9, rot, new THREE.Color(0xd8d2c4));                      // stair / lift tower
+  }
+  if (!sb.empty) { const m = new THREE.Mesh(sb.geometry(), M.vcol); m.castShadow = m.receiveShadow = true; scene.add(m); }
+  WorldFix.stats.elevatedStationsBuilt = n;
 }
 const AIR = { runways: [], helipads: [] };
 function buildAirport() {
@@ -1709,6 +2155,33 @@ function buildAirport() {
     ribbon(ab, xs, zs, null, r.w / 20, r.w / 20, 0.105, 0.08); ribbon(yb, xs, zs, null, 0.15, 0.15, 0.118);
   }
   for (const h of A.helipad) AIR.helipads.push([h[0] / 10, h[1] / 10]);
+  // perimeter fence with gaps where public roads enter the airport
+  const fence = WorldFix.fence, fb = new GeoBuf(true), steel = new THREE.Color(0x8d939a); let gaps = 0, segs = 0;
+  for (let i = 0; i < fence.length; i++) {
+    const p = fence[i], q = fence[(i + 1) % fence.length], L = Math.hypot(q[0] - p[0], q[1] - p[1]), n = Math.max(1, Math.ceil(L / 6));
+    const rot = Math.atan2(q[0] - p[0], q[1] - p[1]);
+    for (let j = 0; j < n; j++) {
+      const a = [p[0] + (q[0] - p[0]) * j / n, p[1] + (q[1] - p[1]) * j / n], b = [p[0] + (q[0] - p[0]) * (j + 1) / n, p[1] + (q[1] - p[1]) * (j + 1) / n];
+      const mx = (a[0] + b[0]) / 2, mz = (a[1] + b[1]) / 2, r = roadQuery(mx, mz, 20);
+      if ((r.seg && r.d < 4) || inWater(mx, mz) || insideBuilding(mx, mz) >= 0) { gaps++; continue; }
+      boxTo(fb, a[0], 1.4, a[1], 0.12, 2.8, 0.12, 0, steel);
+      boxTo(fb, mx, 1.35, mz, 0.04, 2.5, Math.hypot(b[0] - a[0], b[1] - a[1]), rot, new THREE.Color(0x6f7680));
+      boxTo(fb, mx, 2.85, mz, 0.06, 0.06, Math.hypot(b[0] - a[0], b[1] - a[1]), rot, steel);
+      addWallRing([a, b], 2.8); segs++;   // a two-point ring yields both faces
+    }
+  }
+  if (!fb.empty) { const m = new THREE.Mesh(fb.geometry(), M.vcol); m.castShadow = true; scene.add(m); }
+  // departures drop-off bay at the main terminal
+  const term = G.pois.filter(p => p.t === 'airport' && /terminal/i.test(p.n) && !/cargo/i.test(p.n)).sort((a, b) => b.a - a.a)[0];
+  if (term) {
+    const r = roadQuery(term.x, term.z, 250, 0);
+    if (r.seg) {
+      const s_ = r.seg, tx = (s_.bx - s_.ax) / (Math.hypot(s_.bx - s_.ax, s_.bz - s_.az) || 1), tz = (s_.bz - s_.az) / (Math.hypot(s_.bx - s_.ax, s_.bz - s_.az) || 1);
+      WorldFix.dropoff = { x: r.px, z: r.pz, h: Math.atan2(tx, tz), name: term.n, tx: term.x, tz: term.z };
+      for (let o = -12; o <= 12; o += 3) ribbon(yb, [r.px + tx * o - tz * 2, r.px + tx * o + tz * 2], [r.pz + tz * o + tx * 2, r.pz + tz * o - tx * 2], null, 0.2, 0.2, RY + 0.02);
+    }
+  }
+  WorldFix.stats.fenceSegments = segs; WorldFix.stats.fenceGaps = gaps;
   if (!ab.empty) { const m = new THREE.Mesh(ab.geometry(), M.road); m.receiveShadow = true; scene.add(m); }
   if (!mk.empty) scene.add(new THREE.Mesh(mk.geometry(), M.mark));
   if (!yb.empty) scene.add(new THREE.Mesh(yb.geometry(), M.markY));
@@ -1989,6 +2462,91 @@ function gunGeo(kind) {
   gunGeoCache[kind] = g; return g;
 }
 
+// ===================== WEATHER + CINEMATIC GRADE =====================
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+// final full-screen grade: contrast/saturation, vignette, speed blur + chromatic aberration, grain, damage pulse
+const GradeShader = {
+  uniforms: { tDiffuse: { value: null }, uTime: { value: 0 }, uSpeed: { value: 0 }, uHurt: { value: 0 }, uSat: { value: 1.12 }, uContrast: { value: 1.06 }, uVignette: { value: 0.38 }, uWet: { value: 0 }, uFlash: { value: 0 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uTime, uSpeed, uHurt, uSat, uContrast, uVignette, uWet, uFlash; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + uTime * 7.0) * 43758.5453); }
+    void main(){
+      vec2 c = vUv - 0.5; float r = length(c);
+      vec3 col;
+      if (uSpeed > 0.01) {                       // radial zoom blur that grows toward the edges
+        vec3 acc = vec3(0.0); float k = uSpeed * 0.045 * smoothstep(0.1, 0.7, r);
+        for (int i = 0; i < 8; i++) { float t = float(i) / 7.0; vec2 uv = vUv - c * k * t;
+          acc += vec3(texture2D(tDiffuse, uv + c * k * 0.25).r, texture2D(tDiffuse, uv).g, texture2D(tDiffuse, uv - c * k * 0.25).b); }
+        col = acc / 8.0;
+      } else col = texture2D(tDiffuse, vUv).rgb;
+      float l = dot(col, vec3(0.299, 0.587, 0.114));
+      col = mix(vec3(l), col, uSat - uWet * 0.25);
+      col = (col - 0.5) * uContrast + 0.5;
+      col *= mix(vec3(1.0), vec3(0.86, 0.93, 1.05), uWet);                  // cool, wet tint in rain
+      col *= 1.0 - uVignette * smoothstep(0.35, 0.85, r);
+      col += vec3(0.75, 0.0, 0.0) * uHurt * smoothstep(0.25, 0.8, r);
+      col += vec3(0.85, 0.9, 1.0) * uFlash;                                 // lightning
+      col += (h(vUv * 800.0) - 0.5) * 0.035;
+      gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+    }`,
+};
+let gradePass = null;
+function makeGradePass() { gradePass = new ShaderPass(GradeShader); return gradePass; }
+
+const Weather = {
+  kinds: ['clear', 'cloudy', 'rain', 'fog', 'storm'],
+  current: 'clear', target: 'clear', mix: { rain: 0, fog: 0, cloud: 0, storm: 0 }, flash: 0, nextBolt: 6, autoT: 300,
+  rain: null,
+  init() {
+    // 4000 streaks in a box that follows the camera
+    const N = 4000, pos = new Float32Array(N * 6), seed = new Float32Array(N);
+    for (let i = 0; i < N; i++) { const x = (Math.random() - 0.5) * 80, y = Math.random() * 40, z = (Math.random() - 0.5) * 80; pos.set([x, y, z, x, y - 1.6, z], i * 6); seed[i] = Math.random(); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    this.rainMat = new THREE.LineBasicMaterial({ color: 0xbfd2e6, transparent: true, opacity: 0, depthWrite: false });
+    this.rain = new THREE.LineSegments(g, this.rainMat); this.rain.frustumCulled = false; this.rain.renderOrder = 6; scene.add(this.rain);
+    this.boltLight = new THREE.DirectionalLight(0xdfe8ff, 0); this.boltLight.position.set(0, 400, 0); scene.add(this.boltLight);
+  },
+  set(kind) { if (!this.kinds.includes(kind)) return false; this.target = kind; this.current = kind; this.autoT = 400; EventBus.emit('weather:change', { kind }); return true; },
+  update(dt, cam) {
+    if (!this.rain) this.init();
+    // slow automatic cycle in live-time mode
+    if (typeof timeMode !== 'undefined' && timeMode === 'live') { this.autoT -= dt; if (this.autoT < 0) { this.autoT = 240 + Math.random() * 300; this.set(pick(['clear', 'clear', 'cloudy', 'rain', 'fog', 'storm'])); } }
+    const T = this.target, k = Math.min(1, dt * 0.35);
+    const want = { rain: T === 'rain' || T === 'storm' ? 1 : 0, fog: T === 'fog' ? 1 : T === 'rain' ? 0.35 : T === 'storm' ? 0.5 : 0, cloud: T === 'clear' ? 0 : 1, storm: T === 'storm' ? 1 : 0 };
+    for (const key in want) this.mix[key] += (want[key] - this.mix[key]) * k;
+    const m = this.mix;
+    // rain streaks fall and wrap around the camera
+    this.rainMat.opacity = m.rain * 0.7; this.rain.visible = m.rain > 0.02 && !(player && player.interior);
+    if (this.rain.visible) {
+      const p = this.rain.geometry.attributes.position.array, fall = (28 + m.storm * 14) * dt, wind = m.storm * 6 * dt;
+      for (let i = 0; i < p.length; i += 6) { p[i + 1] -= fall; p[i + 4] -= fall; p[i] += wind; p[i + 3] += wind; if (p[i + 4] < -2) { p[i + 1] += 40; p[i + 4] += 40; } if (p[i] > 40) { p[i] -= 80; p[i + 3] -= 80; } }
+      this.rain.geometry.attributes.position.needsUpdate = true; this.rain.position.set(cam.position.x, cam.position.y - 18, cam.position.z);
+      if (Sound.amb && Sound.ctx) Sound.amb.gain.setTargetAtTime(0.04 + m.rain * 0.12, Sound.ctx.currentTime, 0.5);
+    }
+    // lightning
+    this.flash = Math.max(0, this.flash - dt * 3.5);
+    if (m.storm > 0.6 && !(player && player.interior)) { this.nextBolt -= dt; if (this.nextBolt < 0) { this.nextBolt = 4 + Math.random() * 9; this.flash = 1; setTimeout(() => { if (Sound.ctx) { Sound.boom(); } }, 400 + Math.random() * 1600); } }
+    this.boltLight.intensity = this.flash * 6;
+    return m;
+  },
+  // applied after time-of-day so it darkens/greys the scene on top
+  applyAtmosphere() {
+    const m = this.mix; if (!this.rain) return;
+    const grey = m.cloud * 0.5 + m.storm * 0.35;
+    skyUniforms.cloudy.value = m.cloud; skyUniforms.storm.value = m.storm;
+    sun.intensity *= 1 - grey * 0.8; scene.environmentIntensity *= 1 - grey * 0.4;
+    skyUniforms.top.value.lerp(_wcol.setHex(0x6c7480), grey); skyUniforms.hor.value.lerp(_wcol.setHex(0xa8aeb4), grey);
+    scene.fog.color.lerp(_wcol.setHex(0x9aa3ab), Math.max(grey, m.fog) * 0.8);
+    const baseFar = player.veh && player.veh.y > 80 ? Q.fogFar * 1.8 : Q.fogFar;
+    scene.fog.near = Q.fogNear * (1 - m.fog * 0.82); scene.fog.far = Math.max(160, baseFar * (1 - m.fog * 0.72));
+    // wet roads: glossier asphalt with stronger reflections
+    M.road.roughness = 0.85 - m.rain * 0.6; M.road.metalness = m.rain * 0.25; M.walk.roughness = 0.9 - m.rain * 0.5;
+    if (gradePass) { gradePass.uniforms.uWet.value = m.rain; gradePass.uniforms.uFlash.value = this.flash * 0.35; }
+  },
+};
+const _wcol = new THREE.Color();
+
 // ===================== VEHICLES: cars, bikes, boats, ships, helicopters, planes, airliners, trains =====================
 // kind: car | boat | heli | plane
 const SPECS = {
@@ -2250,9 +2808,20 @@ class Vehicle {
       }
       lb(new THREE.MeshBasicMaterial({ color: 0xff2020 }), [-(sp.wid / 2), 2.2, 0.4, 0.15, 0.15, 0.15]); lb(new THREE.MeshBasicMaterial({ color: 0x20ff40 }), [sp.wid / 2, 2.2, 0.4, 0.15, 0.15, 0.15]);
     }
+    this.gearDown = true; this.lightsOn = false;
+    this.attachModel();
     this.group.position.set(x, 0, z); this.group.rotation.y = h;
     scene.add(this.group);
     vehicles.push(this);
+  }
+  // swap the procedural body for the Blender model when one exists for this type
+  attachModel() {
+    if (this.model) { this.group.remove(this.model.root); this.model = null; }
+    const mdl = Assets.vehicleModel(this.type, this.color); if (!mdl) return;
+    this.model = mdl; this.group.add(mdl.root);
+    this.body.visible = false; if (this.glassMesh) this.glassMesh.visible = false;
+    if (mdl.rotor) { if (this.blades) this.blades.visible = false; this.blades = mdl.rotor; }
+    if (mdl.prop) { if (this.prop) this.prop.visible = false; this.prop = mdl.prop; }
   }
   get speed() { return Math.hypot(this.vx, this.vz); }
   get fwdSpeed() { return this.vx * Math.sin(this.h) + this.vz * Math.cos(this.h); }
@@ -2382,15 +2951,18 @@ class Vehicle {
     if (this.fuel <= 0 && this.driver === 'player') this.thr = 0;
     const g0 = groundHeightAt(this.x, this.z, this.y + 1), onG = this.y <= g0 + 0.05;
     let spd = Math.hypot(this.vx, this.vz, this.vy);
-    const acc = this.thr * (sp.max * 0.32) - spd * spd * (0.32 / sp.max) * 0.55 - (onG ? (c.brake > 0.3 ? 12 : 0.8) : 0);
+    const drag = this.gearDown ? 0.55 : 0.42;   // retracting the gear cleans up the airframe
+    const acc = this.thr * (sp.max * 0.32) - spd * spd * (0.32 / sp.max) * drag - (onG ? (c.brake > 0.3 ? 12 : 0.8) : 0);
     spd = Math.max(0, spd + (acc - Math.sin(this.pitch) * 9.8) * dt);
     if (onG) {
       this.roll += (0 - this.roll) * dt * 5;
       if (spd > sp.rot && c.pitch < -0.1) this.pitch += -c.pitch * 0.5 * dt; else this.pitch += (0 - this.pitch) * dt * 4;
       this.h -= c.roll * 0.6 * dt * clamp(spd / 10, 0, 1) + c.yaw * 0.4 * dt;
     } else {
-      this.roll = clamp(this.roll + c.roll * 1.6 * dt, -1.2, 1.2); if (Math.abs(c.roll) < 0.1) this.roll *= Math.exp(-1.0 * dt);
+      this.roll = clamp(this.roll + c.roll * 1.6 * dt, -1.2, 1.2); if (Math.abs(c.roll) < 0.1) this.roll *= Math.exp(-(this.driver === 'player' ? 1.6 : 1.0) * dt);
       this.pitch = clamp(this.pitch - c.pitch * 1.0 * dt, -0.9, 0.9);
+      // arcade assist: hands-off flight trims toward a gentle climb instead of drifting into the ground
+      if (this.driver === 'player' && Math.abs(c.pitch) < 0.1 && spd > sp.stall) this.pitch += (0.03 - this.pitch) * dt * 0.5;
       const stall = spd < sp.stall;
       if (stall) this.pitch += (-0.5 - this.pitch) * dt * 0.8;
       this.h -= (Math.tan(this.roll) * 9.8 / Math.max(spd, 20)) * dt + c.yaw * 0.3 * dt;
@@ -2414,6 +2986,11 @@ class Vehicle {
     this.x = clamp(nx, BX0 - 400, BX1 + 1400); this.z = clamp(nz, BZ0 - 400, BZ1 + 400);
     if (ny <= g) {
       const vy = this.vy, sp = Math.hypot(this.vx, this.vz);
+      if (this.kind === 'plane' && !this.gearDown && sp > 4) {   // belly landing: scrape, sparks, damage
+        this.damage(sp * 6 * dt * 60 / 60 + 4); if (Math.random() < 0.5) Fx.spark(this.x, this.y + 0.3, this.z);
+        this.vx *= Math.exp(-1.5 * dt); this.vz *= Math.exp(-1.5 * dt);
+        if (this.driver === 'player' && !this._bellyWarned) { this._bellyWarned = true; toast('Gear up! Belly landing'); }
+      }
       if (vy < -7 || (this.kind === 'plane' && (Math.abs(this.roll) > 0.5 || this.pitch < -0.25) && sp > 15) || (this.kind === 'heli' && sp > 20)) return this.crashAir(Math.max(-vy, sp));
       this.y = g; this.vy = Math.max(0, this.vy);
       if (inWater(this.x, this.z) && g <= 0.05) { this.sinkT = 0.001; if (this.driver === 'player') onPlayerVehicleSink(this); }
@@ -2454,6 +3031,12 @@ class Vehicle {
       g.rotation.set(0, 0, 0); g.rotation.order = 'YXZ'; g.rotation.y = this.h; g.rotation.x = -this.pitch; g.rotation.z = this.roll;
     }
     this.tailMat.color.setHex(this.braking ? 0xff2a2a : (uNight.value > 0.3 ? 0xaa1a1a : 0x5a0f0f));
+    if (this.model) {
+      if (this.model.gear) this.model.gear.visible = this.gearDown;
+      const lit = this.lightsOn || (uNight.value > 0.3 && !!this.driver);
+      for (const m of this.model.head) m.emissiveIntensity = lit ? 6 : 0.4;
+      for (const m of this.model.tail) m.emissiveIntensity = this.braking ? 6 : lit ? 2 : 0.5;
+    }
     if (this.lbR) {
       const on = this.siren && (Math.floor(performance.now() / 140) % 2 === 0);
       this.lbR.color.setHex(this.siren ? (on ? 0xff2020 : 0x441111) : 0x551111);
@@ -2476,6 +3059,7 @@ class Vehicle {
   setWreck() {
     this.wreck = true; this.burnT = -1; this.health = 0; this.siren = false;
     this.body.material = WRECK_MAT; if (this.glassMesh) this.glassMesh.material = WRECK_MAT;
+    if (this.model) this.model.root.traverse(o => { if (o.isMesh) o.material = WRECK_MAT; });
     if (this.kind === 'car') { this.vx *= 0.3; this.vz *= 0.3; }
     if (this.driverMesh) this.driverMesh.visible = false;
   }
@@ -2612,9 +3196,11 @@ const trains = [], railLines = [];
 class Train {
   constructor(line, s, dir, ncoach = 6) {
     this.line = line; this.s = s; this.dir = dir; this.speed = 0; this.n = ncoach; this.coaches = []; this.stopT = 0; this.nextStop = null; this.passenger = false;
+    this.doors = []; this.doorOpen = 0;
     for (let i = 0; i < ncoach; i++) {
-      const g = coachGeo(i === 0 || i === ncoach - 1); const grp = new THREE.Group();
-      const b = new THREE.Mesh(g.body, TRAIN_MAT); b.castShadow = true; grp.add(b); grp.add(new THREE.Mesh(g.glass, GLASS));
+      const front = i === 0 || i === ncoach - 1, grp = new THREE.Group(), mdl = Assets.coach(front);
+      if (mdl) { grp.add(mdl.root); this.doors.push(...mdl.doors); }
+      else { const g = coachGeo(front); const b = new THREE.Mesh(g.body, TRAIN_MAT); b.castShadow = true; grp.add(b); grp.add(new THREE.Mesh(g.glass, GLASS)); }
       if (i === ncoach - 1) grp.children.forEach(m => m.rotation.y = Math.PI);
       scene.add(grp); this.coaches.push(grp);
     }
@@ -2627,7 +3213,7 @@ class Train {
     for (const s of st) { const d = (s - this.s) * this.dir; if (d > 25 && d < best) { best = d; this.nextStop = s; } }
   }
   update(dt) {
-    const L = this.line, maxV = 22;
+    const L = this.line, maxV = this.fast ? 40 : 22;
     if (this.stopT > 0) { this.stopT -= dt; this.speed = 0; if (this.stopT <= 0) this.pickNextStop(); }
     else {
       let target = maxV;
@@ -2639,10 +3225,19 @@ class Train {
       this.speed += clamp(target - this.speed, -1.6 * dt, 0.7 * dt);
       if (stopD < 1.5 && this.speed < 0.6) {
         this.speed = 0;
-        if (toEnd < 2) { this.dir = -this.dir; this.stopT = 18; } else this.stopT = 14;
+        if (toEnd < 2) { this.dir = -this.dir; this.stopT = this.dwell = this.fast ? 8 : 18; } else this.stopT = this.dwell = this.fast ? 7 : 14;
+        EventBus.emit('train:arrive', { train: this, s: this.s });
       }
     }
     this.s += this.speed * this.dir * dt;
+    // sliding doors: open after the train settles at a stop, close a few seconds before it departs
+    const wantOpen = this.stopT > 3 && this.stopT < (this.dwell || 14) - 1.5 ? 1 : 0;
+    const prevOpen = this.doorOpen; this.doorOpen = clamp(this.doorOpen + (wantOpen ? 1 : -1) * dt * 0.9, 0, 1);
+    if (prevOpen !== this.doorOpen) {
+      for (const d of this.doors) { const sgn = /\d$/.test(d.name) && d.name.endsWith('0') ? -1 : 1; d.position.z = d.userData.z0 + sgn * this.doorOpen * 0.68; }
+      if (prevOpen === 0 && this.doorOpen > 0) EventBus.emit('train:doors', { train: this, open: true });
+      if (prevOpen > 0 && this.doorOpen === 0) EventBus.emit('train:doors', { train: this, open: false });
+    }
     this.hornT -= dt; if (this.hornT < 0) { this.hornT = 20 + Math.random() * 30; if (dist2(this.x || 0, this.z || 0, camera.position.x, camera.position.z) < 300 * 300) Sound.trainHorn(0.06); }
     // place coaches
     for (let i = 0; i < this.n; i++) {
@@ -2672,6 +3267,7 @@ class Train {
     }
   }
 }
+Train.prototype.remove = function () { for (const c of this.coaches) scene.remove(c); const i = trains.indexOf(this); if (i >= 0) trains.splice(i, 1); this.dead = true; };
 const _rp = { x: 0, y: 0, z: 0 };
 function railPoint(L, s, out = { x: 0, y: 0, z: 0 }) {
   s = clamp(s, 0, L.len); const cum = L.cum; let lo = 0, hi = cum.length - 1;
@@ -2987,6 +3583,8 @@ class Walker {
       this.h = headingTo(tx, tz); this.x += tx / l * 2.2 * dt; this.z += tz / l * 2.2 * dt; animatePerson(p, 2.2, dt);
     } else if (this.state === 'stand') {
       animatePerson(p, 0, dt);
+    } else if (this.state === 'sit') {
+      animatePerson(p, 0, dt, 'sit');
     } else {
       if (this.e < 0) { this.snapToRoad(); if (this.e < 0) { this.state = 'idle'; } }
       else {
@@ -3629,6 +4227,7 @@ function enterInterior(type, svc) {
   player.interior = { type, svc, ret: { x: player.x, z: player.z, h: player.h } };
   for (const k in INT) if (INT[k] && INT[k].g) INT[k].g.visible = k === type;
   player.x = I.spawn[0]; player.z = I.spawn[1] - 2.2; player.y = 0; player.h = Math.PI; camYaw = Math.PI; camPitch = 0.22; camSmoothed = false; player.vx = player.vz = 0;
+  if (svc && svc.at) { player.x = I.x + svc.at[0]; player.z = I.z + svc.at[1]; if (svc.atH !== undefined) { player.h = svc.atH; camYaw = svc.atH; } delete svc.at; }
   fadeFlash();
   if (interiorNPC) { interiorNPC.remove(); interiorNPC = null; }
   const clerk = I.spots.clerk || I.spots.teller || I.spots.desk;
@@ -3637,12 +4236,16 @@ function enterInterior(type, svc) {
   if (type === 'dealer') showDealerCars();
   if (type === 'hangar') showHangar();
   robbery = null;
+  if (I.onEnter) I.onEnter(svc);
+  EventBus.emit('interior:enter', { type, svc });
 }
 function exitInterior() {
   const it = player.interior; if (!it) return;
   for (const k in INT) if (INT[k] && INT[k].g) INT[k].g.visible = false;
   clearDisplayCars();
   if (interiorNPC) { interiorNPC.remove(); interiorNPC = null; }
+  if (INT[it.type].onExit) INT[it.type].onExit(it.svc);
+  EventBus.emit('interior:exit', { type: it.type, svc: it.svc });
   player.interior = null; player.x = it.ret.x; player.z = it.ret.z; player.h = it.ret.h + Math.PI; camYaw = player.h; camSmoothed = false; player.y = sidewalkY(player.x, player.z);
   fadeFlash();
   if (robbery && robbery.done) { crime('rob', player.x, player.z); }
@@ -3652,6 +4255,14 @@ function fadeFlash() { const f = $('fade'); f.classList.remove('on'); void f.off
 function interiorCollide() {
   const I = INT[player.interior.type]; const hw = I.W / 2 - 0.5, hd = I.D / 2 - 0.5;
   player.x = clamp(player.x, I.x - hw, I.x + hw); player.z = clamp(player.z, I.z - hd, I.z + hd);
+  // internal partitions (two-sided); a wall with open() returning true lets the player through (gates, turnstiles)
+  if (I.walls) for (const w of I.walls) {
+    if (w.open && w.open()) continue;
+    const ax = I.x + w[0], az = I.z + w[1], dx = w[2] - w[0], dz = w[3] - w[1], L2 = dx * dx + dz * dz;
+    let t = L2 ? ((player.x - ax) * dx + (player.z - az) * dz) / L2 : 0; t = clamp(t, 0, 1);
+    const cx = ax + dx * t, cz = az + dz * t, ex = player.x - cx, ez = player.z - cz, d = Math.hypot(ex, ez), R = 0.45;
+    if (d < R) { const nx = d > 1e-4 ? ex / d : -dz / Math.sqrt(L2), nz = d > 1e-4 ? ez / d : dx / Math.sqrt(L2); player.x = cx + nx * R; player.z = cz + nz * R; }
+  }
 }
 // display cars in garages / dealer
 const displayCars = [];
@@ -3698,7 +4309,17 @@ function serviceInteract(s) {
     case 'garage': if (!player.veh) enterInterior('garage', s); return;
     case 'marina': marinaMenu(s); return;
     case 'station': trainMenu(s); return;
+    default: if (SERVICE_HANDLERS[s.type]) SERVICE_HANDLERS[s.type](s); return;
   }
+}
+const SERVICE_HANDLERS = {};   // type -> fn(svc), registered by the transit / living-world modules
+// add an interior room far outside the city (same layout conventions as buildInteriors)
+let extraInteriorN = 0;
+function addInterior(type, W, D, H, build, floorMat, wallMat) {
+  const g = new THREE.Group(); g.position.set(IX0 + extraInteriorN * 160, 0, IZ0 - 600); extraInteriorN++;
+  room(g, W, D, H, floorMat, wallMat); scene.add(g); g.visible = false;
+  INT[type] = { g, W, D, H, x: g.position.x, z: g.position.z, spawn: [g.position.x, g.position.z + D / 2 - 1.5], spots: {}, walls: [] };
+  build(g, W, D, H, INT[type]); return INT[type];
 }
 function buyProperty(P) {
   if (!saveData.props.includes(P.id)) saveData.props.push(P.id);
@@ -3774,9 +4395,155 @@ function sprayShop(v) {
   if (!Police.flashing || Police.level === 0) { if (Police.level > 0) { Police.set(0); toast('New paint job. The cops lost you.'); } }
   else toast('Repaired. The cops saw you drive in.');
   const c = pick(v.spec.kind === 'car' ? CAR_COLS.concat(SUPER_COLS) : [0xffffff]); v.color = c;
-  if (v.kind === 'car') { const g = carBody(v.type, c); v.body.geometry = g.body; }
+  if (v.kind === 'car') { const g = carBody(v.type, c); v.body.geometry = g.body; if (v.model) v.attachModel(); }
   fadeFlash(); Sound.cash();
 }
+
+// ===================== AIRPORT: terminal interior, check-in, security, gate, passenger flights, pilot charter =====================
+const Airport = {
+  pass: null,          // boarding pass { mode: 'scenic' | 'charter', fare }
+  cleared: false,      // passed security
+  held: null,          // weapons held by security until the flight is over
+  ride: null,          // passenger flight state
+  svc: null,
+  init() {
+    const I = addInterior('terminal', 64, 44, 9, (g, W, D, H, I) => {
+      ibox(g, IMAT.tile, W - 0.2, 0.02, D - 0.2, 0, 0.01, 0);
+      // check-in island (south half, left)
+      for (let k = 0; k < 4; k++) { ibox(g, IMAT.wood, 3.2, 1.1, 1.0, -22 + k * 4.2, 0.55, 8); ibox(g, IMAT.dark, 0.8, 0.5, 0.1, -22 + k * 4.2, 1.5, 7.6); }
+      ibox(g, new THREE.MeshStandardMaterial({ color: 0x2f6fb5, emissive: 0x103060 }), 18, 1.4, 0.2, -15.7, 3.6, 9.6);   // "CHECK-IN" sign band
+      // security line across the hall at z = 0 with one walk-through arch
+      ibox(g, IMAT.glass, W / 2 - 2, 2.4, 0.15, -W / 4 - 1, 1.2, 0); ibox(g, IMAT.glass, W / 2 - 2, 2.4, 0.15, W / 4 + 1, 1.2, 0);
+      ibox(g, IMAT.metal, 0.3, 2.6, 0.8, -1.1, 1.3, 0); ibox(g, IMAT.metal, 0.3, 2.6, 0.8, 1.1, 1.3, 0); ibox(g, IMAT.metal, 2.5, 0.3, 0.8, 0, 2.6, 0);
+      ibox(g, IMAT.dark, 3, 0.9, 1.2, -4, 0.45, 1.6);   // x-ray belt
+      I.walls.push([-W / 2, 0, -1.0, 0], [1.0, 0, W / 2, 0], Object.assign([-1.0, 0, 1.0, 0], { open: () => Airport.cleared }));
+      // departure gate (north half): desk, seating rows, jet bridge doorway
+      ibox(g, IMAT.wood, 4, 1.1, 1.2, 12, 0.55, -14); ibox(g, IMAT.dark, 3, 1.6, 0.1, 12, 2.6, -14.7);
+      for (let r = 0; r < 4; r++) for (let k = 0; k < 6; k++) ibox(g, IMAT.fabric, 1.0, 0.5, 0.9, -20 + k * 1.2, 0.25, -8 - r * 2.4);
+      ibox(g, IMAT.dark, 4, 3.2, 0.2, 18, 1.6, -D / 2 + 0.2);
+      ibox(g, IMAT.glass, 40, 6, 0.1, -6, 4, -D / 2 + 0.1);                                 // window wall onto the apron
+      I.spots = { checkin: [-15.7, 6.6], security: [0, 2.2], gate: [12, -12.6], jetbridge: [18, -D / 2 + 1.2] };
+      I.seats = []; for (let r = 0; r < 4; r++) for (let k = 0; k < 6; k++) I.seats.push([-20 + k * 1.2, -8 - r * 2.4]);
+    });
+    I.onEnter = () => this.populate(I);
+    I.onExit = () => this.depopulate();
+    // terminal door service on the street next to the main terminal / drop-off bay
+    const d = WorldFix.dropoff; const term = d ? { x: d.tx, z: d.tz } : null;
+    if (term) { const door = nearestWallDoor(term.x, term.z, 160) || { x: d.x, z: d.z, h: d.h }; this.svc = addService('terminal', door.x, door.z, { h: door.h, name: d.name, r: 2.2 }); }
+    SERVICE_STYLE.terminal = { label: 'Airport Terminal', icon: '✈', col: '#ffffff' };
+    SERVICE_HANDLERS.terminal = s => { enterInterior('terminal', s); EventBus.emit('airport:enter', {}); };
+    // interior triggers
+    const T = I.spots;
+    Triggers.add({ id: 'airport:checkin', interior: 'terminal', x: I.x + T.checkin[0], z: I.z + T.checkin[1], r: 2.6, prompt: () => this.pass ? 'Boarding pass printed · go through security' : 'Check in & buy a ticket', onUse: () => this.checkinMenu() });
+    Triggers.add({ id: 'airport:security', interior: 'terminal', x: I.x + T.security[0], z: I.z + T.security[1], r: 1.8, prompt: () => this.cleared ? null : this.pass ? 'Walk through security' : 'Boarding pass required', onUse: () => this.security() });
+    Triggers.add({ id: 'airport:gate', interior: 'terminal', x: I.x + T.gate[0], z: I.z + T.gate[1], r: 2.4, prompt: () => this.cleared ? 'Board the flight' : null, onUse: () => this.board() });
+  },
+  populate(I) {
+    this.npcs = [];
+    for (let k = 0; k < 9; k++) { const s = I.seats[(k * 5) % I.seats.length]; const w = new Walker(randomLook(), I.x + s[0], I.z + s[1]); w.state = 'sit'; w.special = true; w.h = Math.PI; w.p.inner.position.y = -0.45; this.npcs.push(w); }
+    for (let k = 0; k < 5; k++) { const w = new Walker(randomLook(), I.x - 10 + k * 3, I.z + 12 + (k % 2) * 2); w.state = 'idle'; w.special = true; w.h = Math.random() * TAU; this.npcs.push(w); }
+    const staff = new Walker(Object.assign(randomLook(), { shirt: 0x2f6fb5 }), I.x + I.spots.checkin[0], I.z + I.spots.checkin[1] + 2.2); staff.state = 'stand'; staff.special = true; staff.h = 0; this.npcs.push(staff);
+  },
+  depopulate() { for (const w of this.npcs || []) w.remove(); this.npcs = []; },
+  checkinMenu() {
+    if (this.pass) { toast('You already have a boarding pass'); return; }
+    Menu.show('Madras Air · Check-in', 'Domestic departures · Terminal 1', [
+      { label: 'Scenic flight over the Marina (passenger)', price: 600, action: () => { this.issue('scenic', 600); return 'close'; } },
+      { label: 'Charter a prop plane and fly it yourself', price: 2500, action: () => { this.issue('charter', 2500); return 'close'; } },
+      { label: 'Not now', action: () => 'close' }]);
+  },
+  issue(mode, fare) { this.pass = { mode, fare }; this.cleared = false; toast('Boarding pass printed · Gate 4'); EventBus.emit('airport:ticket', { mode }); },
+  security() {
+    if (!this.pass || this.cleared) return;
+    if (Object.keys(player.weapons).length) { this.held = player.weapons; player.weapons = {}; equip('fists'); phone('Security', 'Weapons are not allowed past this point. We will hold them until you return.', 6); }
+    this.cleared = true; Sound.tone(880, 0.12, 'sine', 0.1); toast('Security cleared'); EventBus.emit('airport:security', {});
+  },
+  board() {
+    if (!this.cleared || !this.pass) return;
+    const mode = this.pass.mode; this.pass = null; this.cleared = false;
+    EventBus.emit('airport:board', { mode });
+    exitInterior(); fadeFlash();
+    if (mode === 'charter') this.startCharter(); else this.startScenic();
+  },
+  returnWeapons() { if (this.held) { for (const k in this.held) player.weapons[k] = this.held[k]; this.held = null; toast('Security returned your weapons'); } },
+  runway() { return AIR.runways.slice().sort((a, b) => b.len - a.len)[0]; },
+  // ---------------- pilot mode: prop plane lined up on the runway ----------------
+  startCharter() {
+    const rw = this.runway(); if (!rw) return;
+    const a = edgePoint(rw.E, rw.len * 0.06, 1, {});
+    const v = new Vehicle('plane', 0x1f4fa8, a.x, a.z, headingTo(a.tx, a.tz)); v.persist = true; v.owned = true; v.fuel = 1; traffic.push(v);
+    player.x = v.x; player.z = v.z; enterVehicle(v); camYaw = v.h; camSmoothed = false;
+    phone('Tower', 'Madras Tower: cleared for take-off. Throttle up with Space, pull up gently with S past 120 knots, G for gear.', 9);
+    EventBus.emit('airport:pilot', { v });
+  },
+  // ---------------- passenger mode: scripted airliner flight ----------------
+  startScenic() {
+    const rw = this.runway(); if (!rw) return;
+    const a = edgePoint(rw.E, 60, 1, {}), b = edgePoint(rw.E, rw.len - 60, 1, {});
+    const v = new Vehicle('airliner', pick([0x1f4fb3, 0xc8251c, 0x178a45]), a.x, a.z, headingTo(a.tx, a.tz)); v.persist = true; v.driver = 'ai'; v.scripted = true; traffic.push(v);
+    const coast = ll(13.05, 80.285), north = ll(13.10, 80.30), south = ll(12.99, 80.265);
+    const route = [[b.x + a.tx * 1500, 250, b.z + a.tz * 1500], [north[0], 420, north[1]], [coast[0] + 300, 360, coast[1]], [south[0] + 300, 400, south[1]], [a.x - a.tx * 9000, 420, a.z - a.tz * 9000], [a.x - a.tx * 4500, 240, a.z - a.tz * 4500]];
+    this.ride = { v, phase: 'roll', route, wi: 0, a, tx: a.tx, tz: a.tz, cabin: false, t: 0, sp: 0 };
+    player.passenger = v; pMesh.root.visible = false; camMode = 1;
+    toast('Passenger · C cabin / outside view · hold E to skip ahead');
+    EventBus.emit('airport:depart', { mode: 'scenic' });
+  },
+  rideUpdate(dt) {
+    const R = this.ride; if (!R) return; const v = R.v; R.t += dt;
+    if (v.dead || v.wreck) { this.endRide(true); return; }
+    if (In.act('camera')) { R.cabin = !R.cabin; }
+    const skip = In.held('interact');
+    const turnTo = (tx, tz, rate) => { const want = headingTo(tx - v.x, tz - v.z), dh = wrapAngle(want - v.h); v.h += clamp(dh, -rate * dt, rate * dt); v.roll += (clamp(-dh * 1.2, -0.45, 0.45) - v.roll) * dt * 1.5; return Math.abs(dh); };
+    if (R.phase === 'roll') { R.sp = Math.min(R.sp + 2.6 * dt * (skip ? 4 : 1), 80); v.h = headingTo(R.tx, R.tz); if (R.sp > 72) { R.phase = 'cruise'; EventBus.emit('airport:takeoff', {}); } }
+    else if (R.phase === 'cruise') {
+      const w = R.route[R.wi]; R.sp += (110 - R.sp) * dt * 0.3; turnTo(w[0], w[2], 0.22);
+      v.y += clamp(w[1] - v.y, -8 * dt, 9 * dt); v.pitch += (clamp((w[1] - v.y) / 200, -0.12, 0.18) - v.pitch) * dt;
+      if (v.y > 40) v.gearDown = false;
+      if (Math.hypot(w[0] - v.x, w[2] - v.z) < 400 || (skip && R.wi < R.route.length - 1 && R.t > 2)) { R.wi++; R.t = 0; if (skip) { const n = R.route[Math.min(R.wi, R.route.length - 1)]; v.x = n[0] - (n[0] - v.x) * 0.2; v.z = n[2] - (n[2] - v.z) * 0.2; } }
+      if (R.wi >= R.route.length) { R.phase = 'final'; v.gearDown = true; toast('Cabin crew, prepare for landing'); }
+    } else if (R.phase === 'final') {
+      const d = Math.hypot(R.a.x - v.x, R.a.z - v.z); R.sp += (75 - R.sp) * dt * 0.4; turnTo(R.a.x, R.a.z, 0.3);
+      const want = Math.max(0, d * Math.tan(3 * Math.PI / 180)); v.y += clamp(want - v.y, -9 * dt, 3 * dt); v.pitch += (0.05 - v.pitch) * dt;
+      if (d < 40 || v.y < 0.6) { R.phase = 'rollout'; v.y = 0; v.pitch = 0; v.roll = 0; v.h = headingTo(R.tx, R.tz); EventBus.emit('airport:landed', {}); }
+    } else if (R.phase === 'rollout') { R.sp = Math.max(0, R.sp - 6 * dt); v.y = 0; if (R.sp <= 0.5) { this.endRide(false); return; } }
+    v.roll *= Math.exp(-dt * (R.phase === 'roll' ? 6 : 0.4));
+    const hz = Math.cos(v.pitch) * R.sp; v.vx = Math.sin(v.h) * hz; v.vz = Math.cos(v.h) * hz; v.vy = 0;
+    v.x += v.vx * dt; v.z += v.vz * dt; if (R.phase === 'roll' || R.phase === 'rollout') v.y = 0;
+    player.x = v.x; player.z = v.z; player.y = v.y;
+    prompt(R.phase === 'rollout' ? 'Welcome to Chennai' : `Passenger · ${key('C', '←')} ${R.cabin ? 'outside view' : 'window seat'} · hold ${key('E', '→')} to skip ahead`);
+  },
+  endRide(crashed) {
+    const R = this.ride; this.ride = null; player.passenger = null; pMesh.root.visible = true; camMode = 0;
+    if (crashed) { player.y = 0; wasted(); return; }
+    fadeFlash(); R.v.remove();
+    this.returnWeapons();
+    const s = this.svc; if (s) { s.at = [INT.terminal.spots.jetbridge[0], INT.terminal.spots.jetbridge[1] + 1.5]; s.atH = Math.PI; enterInterior('terminal', s); player.interior.ret = { x: s.x, z: s.z, h: s.h }; }
+    banner('ARRIVED', 'Thank you for flying Madras Air', false, 3);
+    EventBus.emit('airport:arrived', { mode: 'scenic' });
+  },
+  // camera for the passenger: chase cam outside, or a window seat looking out over the wing
+  camera(dt) {
+    const R = this.ride; if (!R) return false; const v = R.v;
+    const fx = Math.sin(v.h), fz = Math.cos(v.h), rx = -fz, rz = fx;
+    if (R.cabin) {
+      camera.position.set(v.x + rx * 1.55 + fx * 2, v.y + 4.8, v.z + rz * 1.55 + fz * 2);
+      camera.lookAt(v.x + rx * 40 + fx * 25, v.y + 1 - v.roll * 15, v.z + rz * 40 + fz * 25);
+    } else {
+      updateOrbit(dt, v.x, v.y + 5, v.z, 70);
+    }
+    return true;
+  },
+};
+// mouse-orbit chase camera used by passenger modes
+function updateOrbit(dt, tx, ty, tz, dist) {
+  const lx = (mouse.dx * 0.0028 + In.lx * dt * 2.6) * Settings.sens, ly = (mouse.dy * 0.0022 + In.ly * dt * 1.8) * Settings.sens * (Settings.invert ? -1 : 1);
+  camYaw -= lx; camPitch = clamp(camPitch + ly, -0.2, 1.2);
+  const cp = Math.cos(camPitch); camPos.set(tx - Math.sin(camYaw) * cp * dist, ty + Math.sin(camPitch) * dist, tz - Math.cos(camYaw) * cp * dist);
+  camPos.y = Math.max(camPos.y, groundHeightAt(camPos.x, camPos.z, camPos.y + 5) + 1.5);
+  if (!camSmoothed) { camera.position.copy(camPos); camSmoothed = true; } else camera.position.lerp(camPos, 1 - Math.exp(-dt * 6));
+  camera.lookAt(tx, ty, tz);
+}
+Systems.register('airport', { init() { Airport.init(); } }, 20);
 
 // ===================== TRANSIT & TRAFFIC IN THE AIR AND AT SEA =====================
 function spawnTrains() {
@@ -3800,6 +4567,7 @@ function fastTravel(x, z, msg) {
 // board a moving train when it is stopped next to you
 function trainBoarding() {
   if (player.veh || player.interior || player.dead) return;
+  if (Metro.ride && player.onTrain === Metro.ride.T) { Metro.rideUpdate(1 / 60); return; }
   if (player.onTrain) {
     const T = player.onTrain; const c = T.coaches[Math.floor(T.n / 2)];
     player.x = c.position.x; player.z = c.position.z; player.y = c.position.y + 1.1; player.h = c.rotation.y;
@@ -3840,8 +4608,8 @@ function updateFlights(dt) {
     F.t += dt;
     let sp = Math.hypot(v.vx, v.vz, v.vy);
     if (F.phase === 'roll') { sp = Math.min(sp + 3.2 * dt, 85); v.vx = F.tx * sp; v.vz = F.tz * sp; if (sp > 72) F.phase = 'climb'; }
-    else if (F.phase === 'climb') { v.pitch += (0.17 - v.pitch) * dt; sp = Math.min(sp + 1.5 * dt, 110); v.vy = Math.sin(v.pitch) * sp; const hz = Math.cos(v.pitch) * sp; v.vx = F.tx * hz; v.vz = F.tz * hz; if (v.y > 900) { v.remove(); flights.splice(i, 1); continue; } }
-    else if (F.phase === 'approach') { const dleft = Math.hypot(v.tdx - v.x, v.tdz - v.z); const want = Math.max(0, dleft * Math.tan(3 * Math.PI / 180)); v.vy = clamp((want - v.y) * 0.8, -6, 2); if (v.y < 3) { F.phase = 'rollout'; v.y = 0; v.pitch = 0; } }
+    else if (F.phase === 'climb') { if (v.y > 40) v.gearDown = false; v.pitch += (0.17 - v.pitch) * dt; sp = Math.min(sp + 1.5 * dt, 110); v.vy = Math.sin(v.pitch) * sp; const hz = Math.cos(v.pitch) * sp; v.vx = F.tx * hz; v.vz = F.tz * hz; if (v.y > 900) { v.remove(); flights.splice(i, 1); continue; } }
+    else if (F.phase === 'approach') { if (v.y < 300) v.gearDown = true; const dleft = Math.hypot(v.tdx - v.x, v.tdz - v.z); const want = Math.max(0, dleft * Math.tan(3 * Math.PI / 180)); v.vy = clamp((want - v.y) * 0.8, -6, 2); if (v.y < 3) { F.phase = 'rollout'; v.y = 0; v.pitch = 0; } }
     else if (F.phase === 'rollout') { sp = Math.max(0, sp - 3.5 * dt); v.vx = F.tx * sp; v.vz = F.tz * sp; v.vy = 0; if (sp === 0) { F.phase = 'parked'; F.t = 0; } }
     else if (F.phase === 'parked') { if (F.t > 60 && dist2(v.x, v.z, player.x, player.z) > 600 * 600) { v.remove(); flights.splice(i, 1); continue; } }
     v.x += v.vx * dt; v.z += v.vz * dt; v.y = Math.max(0, v.y + v.vy * dt);
@@ -3875,6 +4643,165 @@ function placeHarbour() {
   }
 }
 
+// ===================== METRO: station entrances, concourse, ticket machine, turnstiles, platform, rides =====================
+const Metro = {
+  stations: [],        // { name, x, z, svc, stops: [{ line, i }] }  one entrance per station (parallel tracks merged)
+  token: null,         // { from, to } bought at the machine
+  gateOpen: false,     // turnstile unlocked by the token
+  platform: null,      // interior platform train state
+  ride: null,          // world ride state
+  init() {
+    // stations from the named stops on every line
+    railLines.forEach((L, li) => (L.stopMeta || []).forEach((st, i) => {
+      if (L.len < 1500) return;
+      let S = this.stations.find(o => o.name === st.name && dist2(o.x, o.z, st.x, st.z) < 400 * 400) || this.stations.find(o => dist2(o.x, o.z, st.x, st.z) < 80 * 80);
+      if (!S) { S = { name: st.name, x: st.x, z: st.z, y: st.y, elevated: !!st.elevated, stops: [] }; this.stations.push(S); }
+      S.stops.push({ line: L, li, i, s: st.s });
+    }));
+    for (const S of this.stations) {
+      const sp = streetSpot(S.x, S.z); if (!sp) continue;
+      const x = sp.x + sp.tz * (sp.hw + 1.8), z = sp.z - sp.tx * (sp.hw + 1.8);
+      S.svc = addService('metro', x, z, { h: sp.h, name: S.name, station: S, r: 2 });
+    }
+    SERVICE_STYLE.metro = { label: 'Metro Station', icon: 'M', col: '#2f8fe8' };
+    SERVICE_HANDLERS.metro = s => { this.gateOpen = false; this.platform = null; enterInterior('metro', s); EventBus.emit('metro:enter', { station: s.name }); };
+    this.buildInterior();
+  },
+  buildInterior() {
+    const I = addInterior('metro', 46, 34, 7, (g, W, D, H, I) => {
+      ibox(g, IMAT.tile, W - 0.2, 0.02, D - 0.2, 0, 0.01, 0);
+      // ticket machines + map board on the concourse (south)
+      for (let k = 0; k < 2; k++) { ibox(g, new THREE.MeshStandardMaterial({ color: 0x2f8fe8, roughness: 0.4 }), 1.2, 1.9, 0.7, -16 + k * 1.8, 0.95, 9); ibox(g, IMAT.dark, 0.8, 0.5, 0.05, -16 + k * 1.8, 1.45, 8.62); }
+      ibox(g, new THREE.MeshStandardMaterial({ color: 0xf4f4f0, emissive: 0x303030 }), 8, 2.4, 0.1, 8, 2.4, D / 2 - 0.2);
+      // turnstile line at z = 3: barrier with three gates in the middle
+      ibox(g, IMAT.metal, 18, 1.1, 0.3, -12.5, 0.55, 3); ibox(g, IMAT.metal, 18, 1.1, 0.3, 12.5, 0.55, 3);
+      for (const x of [-3, -1.5, 0, 1.5, 3]) ibox(g, IMAT.dark, 0.35, 1.1, 1.2, x, 0.55, 3);
+      I.flaps = []; for (const x of [-2.25, -0.75, 0.75, 2.25]) { const f = ibox(g, new THREE.MeshStandardMaterial({ color: 0xd8401c, transparent: true, opacity: 0.8 }), 1.1, 0.6, 0.05, x, 0.8, 3); I.flaps.push(f); }
+      I.walls.push([-W / 2, 3, -3.4, 3], [3.4, 3, W / 2, 3], Object.assign([-3.4, 3, 3.4, 3], { open: () => this.gateOpen }));
+      // platform (north): yellow safety line, edge, track pit beyond z = -11
+      ibox(g, new THREE.MeshStandardMaterial({ color: 0xf2c41f }), W - 1, 0.03, 0.4, 0, 0.03, -10.2);
+      ibox(g, IMAT.concrete, W - 0.2, 1.2, 5.6, 0, -0.6, -D / 2 + 2.9);                        // pit floor (below platform level)
+      ibox(g, IMAT.dark, W - 0.2, 0.15, 0.15, 0, -0.05, -12.9); ibox(g, IMAT.dark, W - 0.2, 0.15, 0.15, 0, -0.05, -14.3);   // rails
+      I.walls.push([-W / 2, -11, W / 2, -11]);                                                 // can't step into the pit
+      for (let k = -2; k <= 2; k++) { ibox(g, IMAT.wood, 2.4, 0.45, 0.6, k * 7, 0.22, -6); }     // benches
+      I.board = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({ map: this.boardTex(), transparent: true })); I.board.position.set(0, 4.2, -9.8); g.add(I.board);
+      I.spots = { machine: [-15.1, 7.8], gate: [0, 4.6], platform: [0, -8.5], alight: [6, -9] };
+    });
+    I.onEnter = () => this.populate(I); I.onExit = () => this.depopulate();
+    Triggers.add({ id: 'metro:machine', interior: 'metro', x: I.x + I.spots.machine[0], z: I.z + I.spots.machine[1], r: 2.2, prompt: () => this.token ? 'Token bought · tap in at the gates' : 'Buy a metro token', onUse: () => this.machineMenu() });
+    Triggers.add({ id: 'metro:gate', interior: 'metro', x: I.x + I.spots.gate[0], z: I.z + I.spots.gate[1], r: 2.2, prompt: () => this.gateOpen ? null : this.token ? 'Tap your token' : 'Token required', onUse: () => this.tapIn() });
+    Triggers.add({ id: 'metro:platform', interior: 'metro', x: I.x, z: I.z - 8.5, r: 22, hy: 3, prompt: () => this.platformPrompt(), key: 'enter', onUse: () => this.boardFromPlatform() });
+    this.I = I;
+  },
+  boardTex(text = 'NEXT TRAIN  2 min') {
+    const c = this._bc || (this._bc = document.createElement('canvas')); c.width = 512; c.height = 128; const x = c.getContext('2d');
+    x.fillStyle = '#0b0d10'; x.fillRect(0, 0, 512, 128); x.fillStyle = '#ffb21c'; x.font = '700 50px "Barlow Condensed", monospace'; x.textBaseline = 'middle'; x.fillText(text, 20, 64);
+    if (!this._bt) { this._bt = new THREE.CanvasTexture(c); this._bt.colorSpace = THREE.SRGBColorSpace; } else this._bt.needsUpdate = true; return this._bt;
+  },
+  populate(I) {
+    this.npcs = [];
+    for (let k = 0; k < 8; k++) { const w = new Walker(randomLook(), I.x - 18 + k * 5, I.z - 7 + (k % 3)); w.state = 'idle'; w.special = true; w.h = Math.PI; this.npcs.push(w); }
+    for (let k = 0; k < 4; k++) { const w = new Walker(randomLook(), I.x - 8 + k * 6, I.z + 10); w.state = 'idle'; w.special = true; w.h = Math.random() * TAU; this.npcs.push(w); }
+  },
+  depopulate() { for (const w of this.npcs || []) w.remove(); this.npcs = []; if (this.platform && this.platform.group) this.I.g.remove(this.platform.group); this.platform = null; },
+  here() { return player.interior && player.interior.svc && player.interior.svc.station; },
+  destinations(S) {
+    const out = [];
+    for (const st of S.stops) for (const m of st.line.stopMeta) {
+      if (Math.abs(m.s - st.s) < 300) continue;
+      const D = this.stations.find(o => o.stops.some(q => q.line === st.line && Math.abs(q.s - m.s) < 60)); if (!D || D === S || out.some(o => o.D === D)) continue;
+      out.push({ D, line: st.line, from: st.s, to: m.s, km: Math.abs(m.s - st.s) / 1000 });
+    }
+    return out.sort((a, b) => a.km - b.km);
+  },
+  machineMenu() {
+    const S = this.here(); if (!S) return;
+    const items = this.destinations(S).slice(0, 12).map(d => ({ label: `${d.D.name}${d.D.elevated ? ' (elevated)' : ''} · ${d.km.toFixed(1)} km`, price: Math.round(10 + d.km * 5), action: () => { this.token = { S, D: d.D, line: d.line, from: d.from, to: d.to }; toast('Token to ' + d.D.name); EventBus.emit('metro:token', { to: d.D.name }); return 'close'; } }));
+    if (!items.length) items.push({ label: 'No connections from this station', disabled: true });
+    items.push({ label: 'Cancel', action: () => 'close' });
+    Menu.show(S.name + ' Metro', 'Single journey token', items);
+  },
+  tapIn() {
+    if (!this.token || this.gateOpen) return;
+    if (this.token.S !== this.here()) { toast('This token is for ' + this.token.S.name); return; }
+    this.gateOpen = true; Sound.tone(1320, 0.1, 'square', 0.06); for (const f of this.I.flaps) f.rotation.y = Math.PI / 2;
+    this.platform = { t: 7, phase: 'wait' }; EventBus.emit('metro:gate', {});
+  },
+  platformPrompt() {
+    const P = this.platform; if (!P || player.z > this.I.z) return null;
+    if (P.phase === 'wait') return null;
+    if (P.phase === 'doors') return 'Board the train';
+    return null;
+  },
+  update(dt) {
+    if (!player.interior || player.interior.type !== 'metro') { for (const f of this.I ? this.I.flaps : []) f.rotation.y = 0; return; }
+    const P = this.platform, I = this.I; if (!P) { this.boardTex(this.token ? 'TAP IN AT THE GATES' : 'BUY A TOKEN'); return; }
+    if (P.phase === 'wait') {
+      P.t -= dt; this.boardTex(`${this.token ? this.token.D.name.toUpperCase().slice(0, 18) : ''}  ${Math.max(0, Math.ceil(P.t))} s`);
+      if (P.t <= 0) { P.phase = 'arrive'; P.x = -70; P.group = new THREE.Group(); P.doors = [];
+        for (let k = 0; k < 3; k++) { const m = Assets.coach(k === 0) || { root: new THREE.Mesh(coachGeo(k === 0).body, TRAIN_MAT), doors: [] }; m.root.rotation.y = -Math.PI / 2; m.root.position.x = -k * 20.2; P.group.add(m.root); P.doors.push(...m.doors); }
+        P.group.position.set(P.x, -1.2, -13.6); I.g.add(P.group); Sound.trainHorn(0.08); }
+    } else if (P.phase === 'arrive') {
+      P.x += Math.max(1.5, (20 - P.x) * 1.2) * dt; P.group.position.x = P.x; this.boardTex('TRAIN ARRIVING');
+      if (P.x >= 20) { P.x = 20; P.phase = 'doors'; P.open = 0; EventBus.emit('metro:arrive', {}); }
+    } else if (P.phase === 'doors') {
+      P.open = Math.min(1, P.open + dt); for (const d of P.doors) d.position.z = d.userData.z0 + (d.name.endsWith('0') ? -1 : 1) * P.open * 0.68;
+      this.boardTex('DOORS OPEN · BOARD NOW');
+    }
+  },
+  boardFromPlatform() {
+    const P = this.platform; if (!P || P.phase !== 'doors' || !this.token) return;
+    const tk = this.token; this.token = null; this.gateOpen = false;
+    exitInterior(); this.startRide(tk);
+  },
+  // ---------------- world ride on a real train along the real line ----------------
+  startRide(tk) {
+    const dir = tk.to > tk.from ? 1 : -1, L = tk.line;
+    const T = new Train(L, clamp(tk.from, 120, L.len - 120), dir, 4);
+    T.stopT = T.dwell = 6; T.fast = true; T.ride = true;
+    // passengers on the benches, the player in the middle coach
+    const mid = T.coaches[1]; this.seated = [];
+    for (let i = 0; i < T.coaches.length; i++) for (let k = 0; k < 5; k++) { if (Math.random() < 0.35) continue; const m = seatedMesh(randomLook()); m.position.set((k % 2 ? 1 : -1) * 1.1, 1.15, -8 + k * 4); m.rotation.y = (k % 2 ? -1 : 1) * Math.PI / 2; T.coaches[i].add(m); }
+    const me = seatedMesh(PLAYER_LOOK); me.position.set(-1.1, 1.15, 0); me.rotation.y = Math.PI / 2; mid.add(me);
+    this.ride = { T, tk, cabin: false, dest: tk.to, t: 0 };
+    player.onTrain = T; pMesh.root.visible = false; camMode = 1; camSmoothed = false;
+    toast(`Metro to ${tk.D.name} · C cabin / outside · hold E to skip ahead · F to get off at a stop`);
+    EventBus.emit('metro:board', { to: tk.D.name });
+  },
+  rideUpdate(dt) {
+    const R = this.ride, T = R.T; R.t += dt;
+    const c = T.coaches[1]; player.x = c.position.x; player.z = c.position.z; player.y = c.position.y + 1.1; player.h = c.rotation.y;
+    if (In.act('camera')) R.cabin = !R.cabin;
+    const toDest = (R.dest - T.s) * T.dir;
+    // hold E: fast-forward to the next stop (fade cut), the train keeps its schedule from there
+    if (In.held('interact') && T.stopT <= 0 && R.t > 1) { const next = T.nextStop !== null ? T.nextStop : R.dest; if (Math.abs(next - T.s) > 60) { T.s = next - T.dir * 1.0; T.speed = 0.3; fadeFlash(); R.t = 0; } }
+    const atStop = T.stopT > 0;
+    if (atStop && Math.abs(T.s - R.dest) < 40) { this.alight(true); return; }
+    const nextName = (() => { const m = T.line.stopMeta.find(q => Math.abs(q.s - (T.nextStop ?? R.dest)) < 5); return m ? m.name : ''; })();
+    prompt(atStop ? `${key('F', '△')} Get off here · next: ${nextName}` : `Metro to <b>${R.tk.D.name}</b> · ${(Math.max(0, toDest) / 1000).toFixed(1)} km · ${key('C', '←')} view · hold ${key('E', '→')} skip`);
+    if (atStop && In.act('enter') && R.t > 0.5) this.alight(false);
+  },
+  alight(atDest) {
+    const R = this.ride, T = R.T; this.ride = null; player.onTrain = null; pMesh.root.visible = true; camMode = 0;
+    const st = T.line.stopMeta.reduce((b, m) => Math.abs(m.s - T.s) < Math.abs(b.s - T.s) ? m : b, T.line.stopMeta[0]);
+    const S = this.stations.find(o => o.stops.some(q => q.line === T.line && Math.abs(q.s - st.s) < 60)) || R.tk.D;
+    setTimeout(() => T.remove(), 8000);
+    if (S && S.svc) { S.svc.at = this.I.spots.alight; S.svc.atH = 0; this.gateOpen = true; enterInterior('metro', S.svc); player.interior.ret = { x: S.svc.x, z: S.svc.z, h: S.svc.h }; }
+    toast(`${S ? S.name : 'Station'}${S && S.elevated ? ' · elevated station' : ''}`);
+    EventBus.emit('metro:alight', { station: S ? S.name : '', elevated: !!(S && S.elevated), atDest });
+  },
+  camera(dt) {
+    const R = this.ride; if (!R) return false; const c = R.T.coaches[1];
+    if (R.cabin) {   // seated, looking out of the window across the aisle
+      const fx = Math.sin(c.rotation.y), fz = Math.cos(c.rotation.y), rx = -fz, rz = fx;
+      camera.position.set(c.position.x - rx * 0.9, c.position.y + 2.3, c.position.z - rz * 0.9);
+      camera.lookAt(c.position.x + rx * 30 + fx * 8, c.position.y + 1.6, c.position.z + rz * 30 + fz * 8);
+    } else updateOrbit(dt, c.position.x, c.position.y + 3, c.position.z, 34);
+    return true;
+  },
+};
+Systems.register('metro', { init() { Metro.init(); }, update(dt) { Metro.update(dt); } }, 25);
+
 // ===================== GAME: player, camera, HUD, map, loop =====================
 const player = { x: 0, z: 0, y: 0, h: 0, vx: 0, vz: 0, vy: 0, veh: null, health: 100, armor: 0, cash: 0, bank: 0, dead: false, downT: 0, punchT: 0, swim: false, regenT: 0, hurtT: 0,
   weapons: {}, weapon: null, fireT: 0, reloadT: 0, aiming: false, aimT: 0, interior: null, onTrain: null, gunMesh: null, armedThreat: false };
@@ -3882,7 +4809,7 @@ let timeMode = store.get('mh-time') || 'day';
 let gameState = 'title', paused = false, hour = 12.5, camYaw = 0, camPitch = 0.3, camMode = 0, shakeT = 0;
 const SAVE_KEY = 'mh-save-v2';
 function freshSave() { return { cash: 2500, bank: 0, done: [], packages: [], rides: 0, hour: 12.5, props: ['chetpet'], home: 'chetpet', garages: { chetpet: [{ type: 'sedan', color: 0x1f4fa8 }] }, aircraft: [], boats: [], stash: {}, locker: {}, weapons: {}, stats: {} }; }
-let saveData = Object.assign(freshSave(), store.get(SAVE_KEY) || {});
+let saveData = sanitizeSave(Object.assign(freshSave(), store.get(SAVE_KEY) || {}));
 player.cash = saveData.cash; player.bank = saveData.bank; hour = timeMode === 'day' ? 12.5 : (saveData.hour || 12.5);
 for (const k in saveData.weapons) player.weapons[k] = Object.assign({}, saveData.weapons[k]);
 const playerVeh = () => player.veh;
@@ -3890,12 +4817,13 @@ function playerTarget() {
   const v = player.veh;
   if (v) return { x: v.x, z: v.z, vx: v.vx, vz: v.vz, slow: v.speed < 3 };
   if (player.onTrain) return { x: player.onTrain.x, z: player.onTrain.z, vx: 0, vz: 0, slow: false };
+  if (player.passenger) return { x: player.passenger.x, z: player.passenger.z, vx: 0, vz: 0, slow: false };
   return { x: player.x, z: player.z, vx: player.vx, vz: player.vz, slow: true };
 }
 function saveGame(silent) {
   saveData.cash = Math.round(player.cash); saveData.bank = Math.round(player.bank); saveData.hour = hour;
-  saveData.weapons = JSON.parse(JSON.stringify(player.weapons));
-  const ok = store.set(SAVE_KEY, saveData);
+  saveData.weapons = JSON.parse(JSON.stringify(Airport.held ? Object.assign({}, Airport.held, player.weapons) : player.weapons));
+  const ok = store.set(SAVE_KEY, sanitizeSave(saveData));
   if (!silent) toast(ok ? 'Game saved' : 'Saving is blocked in this browser');
 }
 // ---------- HUD helpers ----------
@@ -4027,14 +4955,14 @@ function updatePlayerFoot(dt) {
   else {
     p.x = clamp(p.x, BX0 + 3, BX1 - 3); p.z = clamp(p.z, BZ0 + 3, BZ1 - 3);
     const s = surfaceAt(p.x, p.z, p.y);
-    let ground = s.elev ? s.y : sidewalkY(p.x, p.z);
+    let ground = s.elev ? s.y : Math.max(sidewalkY(p.x, p.z), walkSurfaceAt(p.x, p.z));
     const bi = insideBuilding(p.x, p.z); if (bi >= 0 && p.y >= bPolys[bi].h - 1.5) ground = bPolys[bi].h;   // on a rooftop
     const deck = shipDeckAt(p.x, p.z, p.y); if (deck !== null) ground = deck;
     if (In.act('jump') && p.y <= ground + 0.05 && !p.swim) p.vy = 5.2;
     p.vy -= 18 * dt; p.y += p.vy * dt;
     if (p.y <= ground) { if (p.vy < -16) hurtPlayer((-p.vy - 14) * 8); p.y = ground; p.vy = 0; }
     if (s.elev && p.y > 0.8 && s.ex > -0.4) { const ex = p.x - s.px, ez = p.z - s.pz, l = Math.hypot(ex, ez) || 1, push = s.ex + 0.4; p.x -= ex / l * push; p.z -= ez / l * push; }
-    const r = collideCircle(p.x, p.z, 0.4, p.y); p.x = r.x; p.z = r.z;
+    const r = collideCircle(p.x, p.z, 0.4, p.y, 1.0); p.x = r.x; p.z = r.z;
     p.swim = p.y < 0.4 && inWater(p.x, p.z) && !(roadQuery(p.x, p.z, 3).d < 0);
     if (p.swim) p.y = -0.9 + Math.sin(performance.now() / 400) * 0.05;
     for (const v of vehicles) {
@@ -4117,6 +5045,10 @@ function updatePlayerVehicle(dt) {
   if (player.aiming && player.weapon && WEAPONS[player.weapon].mag < 40 && In.held('fire') && player.reloadT <= 0) playerFire();
   if (In.act('enter') && (v.kind !== 'heli' && v.kind !== 'plane' || v.y < groundHeightAt(v.x, v.z, v.y + 2) + 1.5 || v.speed < 3)) { exitVehicle(); return; }
   if (In.act('enter') && (v.kind === 'heli' || v.kind === 'plane')) { exitVehicle(); player.vy = 0; toast('Bailed out!'); return; }
+  if (In.act('gear')) {
+    if (v.kind === 'car') { v.lights = { auto: 'on', on: 'off', off: 'auto' }[v.lights || 'auto']; toast('Headlights: ' + v.lights); Sound.click(); }
+    else if (v.kind === 'plane') { if (groundedPlane(v) && v.gearDown) toast('Can\'t raise the gear on the ground'); else { v.gearDown = !v.gearDown; toast(v.gearDown ? 'Gear down' : 'Gear up'); Sound.tone(v.gearDown ? 300 : 500, 0.4, 'sawtooth', 0.05, 0, v.gearDown ? -120 : 120); EventBus.emit('vehicle:gear', { down: v.gearDown }); } }
+  }
   if (In.act('flip') && v.kind === 'car' && v.speed < 3) { const r = roadQuery(v.x, v.z, 30); if (r.seg) { v.x = r.px; v.z = r.pz; v.y = r.y; v.h = headingTo(r.seg.bx - r.seg.ax, r.seg.bz - r.seg.az); v.vx = v.vz = 0; toast('Back on the road'); } }
   if (In.held('horn')) for (const w of peds) { if (dist2(w.x, w.z, v.x, v.z) < 324 && Math.random() < dt * 2) w.scare(v.x, v.z); }
   player.x = v.x; player.z = v.z; player.y = v.y;
@@ -4148,8 +5080,9 @@ function explodeVehicle(v) {
 const camPos = new THREE.Vector3(), camTarget = new THREE.Vector3();
 let camSmoothed = false;
 function updateCamera(dt) {
+  if (Airport.camera(dt) || Metro.camera(dt)) { $('crosshair').hidden = true; $('scope').hidden = true; return; }
   const v = player.veh;
-  let lx = mouse.dx * 0.0028 + In.lx * dt * 2.6, ly = mouse.dy * 0.0022 + In.ly * dt * 1.8;
+  let lx = (mouse.dx * 0.0028 + In.lx * dt * 2.6) * Settings.sens, ly = (mouse.dy * 0.0022 + In.ly * dt * 1.8) * Settings.sens * (Settings.invert ? -1 : 1);
   const sens = player.aiming ? 0.55 : 1;
   if (lx || ly) { camYaw -= lx * sens; camPitch = clamp(camPitch + ly * sens, -0.5, 1.2); mouse.lastMove = performance.now(); }
   if (In.act('camera')) { camMode = (camMode + 1) % 3; toast(['Close camera', 'Far camera', 'High camera'][camMode]); }
@@ -4207,13 +5140,42 @@ function updateCamera(dt) {
   $('crosshair').hidden = !(player.aimT > 0.5 || (player.aiming && player.veh));
   $('scope').hidden = !(W && W.scope && player.aimT > 0.8);
 }
+// volumetric-looking headlight beams for the player's car
+// soft light cone: fades with distance from the lamp and toward the silhouette, so it reads as lit haze, not a solid shape
+const beamMat = new THREE.ShaderMaterial({
+  uniforms: { uOpacity: { value: 0 }, uColor: { value: new THREE.Color(0xfff1cc) } },
+  vertexShader: 'varying float vZ; varying vec3 vN; varying vec3 vV; void main(){ vZ = position.z / 22.0; vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
+  fragmentShader: 'uniform float uOpacity; uniform vec3 uColor; varying float vZ; varying vec3 vN; varying vec3 vV; void main(){ float edge = pow(abs(dot(normalize(vN), normalize(vV))), 1.5); float fall = pow(clamp(1.0 - vZ, 0.0, 1.0), 2.0) * smoothstep(0.0, 0.06, vZ); gl_FragColor = vec4(uColor, uOpacity * edge * fall); }',
+  transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+});
+const beams = (() => { const g = new THREE.ConeGeometry(3.6, 22, 24, 1, true); g.translate(0, -11, 0); g.rotateX(-Math.PI / 2); const grp = new THREE.Group(); grp.rotation.order = 'YXZ'; for (const s of [-1, 1]) { const m = new THREE.Mesh(g, beamMat); m.position.x = s * 0.55; m.frustumCulled = false; grp.add(m); } grp.visible = false; scene.add(grp); return grp; })();
+function updateBeams(pv, lit) {
+  beams.visible = !!lit; if (!lit) return;
+  beamMat.uniforms.uOpacity.value = 0.1 + uNight.value * 0.18 + Weather.mix.fog * 0.15 + Weather.mix.rain * 0.1;
+  const fx = Math.sin(pv.h), fz = Math.cos(pv.h); beams.position.set(pv.x + fx * pv.spec.len * 0.5, pv.y + 0.75, pv.z + fz * pv.spec.len * 0.5); beams.rotation.set(0.05, pv.h, 0);
+}
+// recover anything that ends up below the world or with broken numbers (falling-through-world guard)
+function failsafe() {
+  const bad = n => !Number.isFinite(n);
+  const v = player.veh;
+  if (v && (bad(v.x) || bad(v.y) || bad(v.z) || (v.y < -15 && !v.sinkT))) {
+    const r = roadQuery(Number.isFinite(v.x) ? v.x : player.x, Number.isFinite(v.z) ? v.z : player.z, 200, 0);
+    if (r.seg) { v.x = r.px; v.z = r.pz; v.y = r.y; v.vx = v.vz = v.vy = 0; toast('Recovered to the road'); EventBus.emit('failsafe', { what: 'vehicle' }); }
+  }
+  if (!v && !player.interior && !player.onTrain && !player.dead && (bad(player.x) || bad(player.y) || bad(player.z) || player.y < -12)) {
+    const r = roadQuery(bad(player.x) ? 0 : player.x, bad(player.z) ? 0 : player.z, 300, 0);
+    const s = r.seg ? roadSpot(r.px, r.pz, 1) : { x: 0, z: 0 }; player.x = s.x; player.z = s.z; player.y = sidewalkY(s.x, s.z); player.vx = player.vz = player.vy = 0; camSmoothed = false;
+    EventBus.emit('failsafe', { what: 'player' });
+  }
+}
 // ---------- wasted / busted ----------
 let respawnT = 0, respawnAt = null;
 function nearestOf(type, x, z) { let b = null, bd = 1e18; for (const p of G.pois) if (p.t === type && (type !== 'hospital' || p.a > 5000)) { const d = dist2(p.x, p.z, x, z); if (d < bd) { bd = d; b = p; } } return b; }
 function wasted() {
   if (player.dead) return; player.dead = true; player.health = 0;
   if (player.veh) exitVehicle(true);
-  if (player.onTrain) { player.onTrain = null; }
+  if (player.onTrain) { if (Metro.ride) { Metro.ride = null; } player.onTrain = null; }
+  if (player.passenger) { player.passenger = null; Airport.ride = null; }
   banner('WASTED', 'Waking up at the hospital…', true, 3.5); Sound.fail(); rumble(1, 1, 600);
   respawnAt = { p: nearestOf('hospital', player.x, player.z), kind: 'hospital' }; respawnT = 3.5;
   if (mission) failMission('', true);
@@ -4386,6 +5348,7 @@ function blipList(big = false) {
   for (const c of Police.copPeds) b.push({ x: c.x, z: c.z, col: fl ? '#ff3030' : '#3060ff', r: 3 });
   for (const v of vehicles) if (v.owned && v.driver !== 'player' && !v.wreck) b.push({ x: v.x, z: v.z, col: '#5aa0ff', r: 4 });
   for (const T of trains) if (T.x !== undefined && dist2(T.x, T.z, player.x, player.z) < (big ? 1e12 : 600 * 600)) b.push({ x: T.x, z: T.z, col: '#c9b37a', r: 3 });
+  for (const h of UI.hubBlips(big)) if (big || dist2(h.x, h.z, player.x, player.z) < 700 * 700 || h.edge) b.push(h);
   return b;
 }
 function drawMinimap() {
@@ -4488,6 +5451,7 @@ function updateHUD(dt) {
   if (phoneT > 0) { phoneT -= dt; if (phoneT <= 0) $('phone').classList.remove('show'); }
   if (cashFlashT > 0) { cashFlashT -= dt; if (cashFlashT <= 0) $('cashDelta').className = ''; }
   const hurt = $('hurt'); if (+hurt.style.opacity > 0) hurt.style.opacity = Math.max(0, +hurt.style.opacity - dt * 1.2);
+  UI.flightHud(player.veh); UI.tracker();
   hudT -= dt; if (hudT > 0) return; hudT = 0.1;
   const hh = Math.floor(hour), mn = Math.floor((hour - hh) * 60);
   hud.clock.textContent = String(hh).padStart(2, '0') + ':' + String(mn).padStart(2, '0');
@@ -4499,9 +5463,9 @@ function updateHUD(dt) {
   const v = player.veh;
   hud.speedo.hidden = !v; hud.vbar.hidden = !v; hud.fbar.hidden = !v || v.type === 'cargo';
   if (v) {
-    hud.kmh.textContent = Math.round(v.speed * 3.6); hud.vbarI.style.width = clamp(v.health / v.spec.hp * 100, 0, 100) + '%';
+    hud.kmh.textContent = Math.round(v.speed * 3.6); $('gear').textContent = UI.gearText(v); hud.vbarI.style.width = clamp(v.health / v.spec.hp * 100, 0, 100) + '%';
     hud.fbarI.style.width = clamp(v.fuel * 100, 0, 100) + '%'; hud.fbarI.style.background = v.fuel < 0.15 ? '#d9402a' : '#e8e2d0';
-    const air = v.kind === 'heli' || v.kind === 'plane'; hud.alt.hidden = !air; if (air) hud.alt.textContent = `ALT ${Math.round(v.y)} m${v.kind === 'plane' ? ' · THR ' + Math.round(v.thr * 100) + '%' : ''}`;
+    const air = v.kind === 'heli' || v.kind === 'plane'; hud.alt.hidden = true; if (air) hud.alt.textContent = `ALT ${Math.round(v.y)} m${v.kind === 'plane' ? ' · THR ' + Math.round(v.thr * 100) + '%' : ''}`;
   } else hud.alt.hidden = true;
   const wk = player.weapon;
   hud.weapon.hidden = !wk; if (wk) { const inv = player.weapons[wk]; hud.weapon.innerHTML = `<b>${WEAPONS[wk].name}</b> <span>${player.reloadT > 0 ? 'RELOADING' : inv.clip + ' / ' + inv.ammo}</span>`; }
@@ -4586,7 +5550,7 @@ $('resetNo').onclick = () => { $('resetConfirm').hidden = true; };
 $('resetYes').onclick = () => { store.del(SAVE_KEY); location.reload(); };
 $('controlsBtn').onclick = () => { $('title').hidden = true; $('pause').hidden = false; $('resumeBtn').textContent = 'Back'; $('resumeBtn').onclick = () => { $('pause').hidden = true; $('title').hidden = false; $('resumeBtn').textContent = 'Resume'; $('resumeBtn').onclick = () => setPaused(false); }; };
 addEventListener('keydown', e => {
-  if (gameState !== 'play' || Menu.open) return;
+  if (gameState !== 'play' || Menu.open || typing(e) || UI.modalOpen()) return;
   if (e.code === 'Escape' && bm.open) openMap(false);
   else if (e.code === 'KeyP' || (e.code === 'Escape' && !pointerLocked && !bm.open)) setPaused(!paused);
 });
@@ -4619,7 +5583,8 @@ function frame(now) {
     sky.position.copy(camera.position); if (!window.__norender) renderFrame(); return;
   }
   In.update(!!player.veh);
-  if (Menu.open) { Menu.update(); In.endFrame(); if (!window.__norender) renderFrame(); return; }
+  Cheats.listen();
+  if (Menu.open || UI.modalOpen()) { if (Menu.open) Menu.update(); else UI.update(); if (Dialogue.open) Dialogue.camera(dt); Fx.update(dt); updateHUD(dt); In.endFrame(); if (!window.__norender) renderFrame(); return; }
   if (In.act('pause')) setPaused(!paused);
   if (paused) { if (gpHit(BTN.O) || gpHit(BTN.OPTIONS)) setPaused(false); In.endFrame(); return; }
   if (In.act('map')) openMap(!bm.open);
@@ -4631,13 +5596,14 @@ function frame(now) {
   prompt('');
   if (respawnT > 0) { respawnT -= dt; if (respawnT <= 0) doRespawn(); }
   else if (!player.dead) {
-    if (player.onTrain) trainBoarding();
+    if (player.passenger) Airport.rideUpdate(dt);
+    else if (player.onTrain) { if (Metro.ride) Metro.rideUpdate(dt); else trainBoarding(); }
     else if (player.veh) updatePlayerVehicle(dt); else { updatePlayerFoot(dt); trainBoarding(); }
     if (player.regenT > 0) player.regenT -= dt; else if (player.health < 50) player.health += dt * 2;
   }
   if (!player.interior) {
     for (const v of traffic) {
-      if (v.dead || v === player.veh || v.flight || v.shipDir !== undefined || v.moored || v.displayOnly) continue;
+      if (v.dead || v === player.veh || v.scripted || v.flight || v.shipDir !== undefined || v.moored || v.displayOnly) continue;
       if (v.heliAI) { updateHeliAI(v, dt); continue; }
       if (v.driver === 'ai' && v.agent) v.update(dt, v.agent.update(dt));
       else if (v.kind === 'heli' || v.kind === 'plane') { if (v.y > 0.2 || v.wreck || v.speed > 0.1) v.update(dt, NOCTRL); }
@@ -4654,6 +5620,9 @@ function frame(now) {
   updateRockets(dt); updatePickups(dt);
   updateMission(dt); updateRideJob(dt); updatePackages(dt); updateGPS(dt); updateRobbery(dt);
   updateInteractions(dt); updateServiceMarkers(dt);
+  if (!player.dead && !player.veh && !player.onTrain) Triggers.update(player.x, player.y, player.z, player.interior ? player.interior.type : null);
+  Systems.update(dt);
+  failsafe();
   for (const v of vehicles) v.sync(dt);
   if (player.veh) { const pv = player.veh; if (pv.driverMesh) pv.driverMesh.visible = true; }
   pMesh.root.position.set(player.x, player.y, player.z); pMesh.root.rotation.y = player.h;
@@ -4661,12 +5630,20 @@ function frame(now) {
   Fx.update(dt);
   updateCamera(dt);
   const focus = player.interior ? player.interior.ret : player;
+  const pv = player.veh;
   chunkT -= dt; if (chunkT <= 0) { chunkT = 0.1; updateChunks(focus.x, focus.z); }
   if (player.interior) { applyTimeOfDay(12, focus.x, focus.z); sun.intensity = 0; hemi.intensity = 0.6; scene.fog.near = 400; scene.fog.far = 2000; scene.environmentIntensity = 0.6; if (bloomPass) bloomPass.strength = 0.08; }
-  else { applyTimeOfDay(hour, player.x, player.z); scene.fog.near = Q.fogNear; }
+  else { applyTimeOfDay(hour, player.x, player.z); scene.fog.near = Q.fogNear; Weather.update(dt, camera); Weather.applyAtmosphere(); }
+  if (gradePass) {
+    const gu = gradePass.uniforms; gu.uTime.value = uTime.value;
+    gu.uSpeed.value += ((pv ? clamp((pv.speed - 22) / 40, 0, 1) : 0) - gu.uSpeed.value) * Math.min(1, dt * 3);
+    gu.uHurt.value = +$('hurt').style.opacity || 0; gu.uVignette.value = player.interior ? 0.3 : 0.38;
+  }
   M2.head.color.setHex(uNight.value > 0.35 ? 0xfff3c8 : 0xd8d2bd);
-  const pv = player.veh;
-  if (pv && pv.kind === 'car' && uNight.value > 0.25) { const fx = Math.sin(pv.h), fz = Math.cos(pv.h); headL.intensity = 120 * uNight.value; headL.position.set(pv.x + fx * pv.spec.len * 0.5, pv.y + 0.9, pv.z + fz * pv.spec.len * 0.5); headL.target.position.set(pv.x + fx * 25, pv.y, pv.z + fz * 25); } else headL.intensity = 0;
+  const lit = pv && pv.kind === 'car' && (pv.lights === 'on' || ((pv.lights || 'auto') === 'auto' && (uNight.value > 0.25 || Weather.mix.rain > 0.5 || Weather.mix.fog > 0.5)));
+  if (pv) pv.lightsOn = !!lit;
+  if (lit) { const fx = Math.sin(pv.h), fz = Math.cos(pv.h); headL.intensity = 120 * Math.max(0.35, uNight.value); headL.position.set(pv.x + fx * pv.spec.len * 0.5, pv.y + 0.9, pv.z + fz * pv.spec.len * 0.5); headL.target.position.set(pv.x + fx * 25, pv.y, pv.z + fz * 25); } else headL.intensity = 0;
+  updateBeams(pv, lit);
   sky.position.copy(camera.position);
   updateHUD(dt); drawMinimap(); updateUpdateHelp();
   let sirenD = 1e9, rotorD = 1e9, jetD = 1e9; for (const v of vehicles) { const d = Math.hypot(v.x - player.x, v.z - player.z, v.y - player.y); if (v.siren) sirenD = Math.min(sirenD, d); if (v.kind === 'heli' && v.driver !== 'player' && v.rotor > 0.5) rotorD = Math.min(rotorD, d); if (v.type === 'airliner' || v.type === 'jet') jetD = Math.min(jetD, d); }
@@ -4694,7 +5671,9 @@ async function boot() {
   try {
     txt.textContent = 'Downloading the city map…';
     const ML = m => { if (window.__memlog && performance.memory) console.log('MEM ' + m + ' ' + (window.gc && gc(), Math.round(performance.memory.usedJSHeapSize / 1e6))); };
+    const assetP = Assets.load();
     WD = await loadWorldData(p => { fill.style.width = Math.round(p * 10) + '%'; });
+    txt.textContent = 'Loading 3D models…'; await assetP;
     [BX0, BZ0, BX1, BZ1] = WD.meta.bounds.map(v => v / 10);
     ML('json');
     await initWorld((p, msg) => { ML(msg); fill.style.width = Math.round(10 + p * 80) + '%'; txt.textContent = msg; });
@@ -4703,7 +5682,9 @@ async function boot() {
     buildInteriors(); setupServices();
     txt.textContent = 'Drawing the map…'; await tick();
     ML('services'); buildMapCanvas();
-    defineMissions(); buildPackages(); spawnTrains(); placeHarbour();
+    Systems.init();
+    Weather.set(saveData.weather || 'clear');
+    defineMissions(); missionTriggers(); buildPackages(); spawnTrains(); placeHarbour();
     ML('missions'); spawnAtHome();
     txt.textContent = 'Building the streets around you…'; await tick();
     updateChunks(player.x, player.z, 1e9, true);
@@ -4732,10 +5713,265 @@ async function boot() {
   window.__mh = {
     setHour: h => { hour = h; }, tp: (x, z, yaw, pitch = 0.32, mode = 0) => { if (player.veh) exitVehicle(); const r = roadQuery(x, z, 60, 0); if (r.seg) { x = r.px; z = r.pz; } player.x = x; player.z = z; player.y = 0; camYaw = yaw; camPitch = pitch; camMode = mode; camSmoothed = false; player.h = yaw; updateChunks(x, z, 1e9, true); },
     drive: (type, x, z, h) => { const r = roadQuery(x, z, 60, 0); if (r.seg) { x = r.px; z = r.pz; h = headingTo(r.seg.bx - r.seg.ax, r.seg.bz - r.seg.az); } const v = new Vehicle(type, undefined, x, z, h); traffic.push(v); enterVehicle(v); camYaw = h; camSmoothed = false; updateChunks(x, z, 1e9, true); return v; },
+    failMission, serviceInteract, walkPolys, walkSurfaceAt, centroidOf: centroid, Airport, Metro, Living, Dialogue, Cheats, UI, MissionFW, Settings, nextStep, interiorCollide, get waypoint() { return waypoint; }, sanitizeSave, WorldFix, railLines, Weather, Assets, EventBus, Systems, Triggers, Layers, get gradePass() { return gradePass; },
     player, vehicles, peds, traffic, Police, G, services, PROPERTIES, trains, flights, get mission() { return mission; }, startMission, MISSIONS, enterVehicle, exitVehicle, renderer, camera, scene, saveData, giveWeapon, equip, enterInterior, exitInterior, INT, get rideJob() { return rideJob; }, press: c => pressed.add(c), chunks, BLD, get robbery() { return robbery; }, set robbery(r) { robbery = r; }, Police, passMission, get missionObj() { return mission; }, AIR, edgePoint, Vehicle, surfaceAt, get bounds() { return [BX0, BZ0, BX1, BZ1]; }, collideCircle, sidewalkY, get traffic2() { return traffic; }, snap: () => { { const nr = window.__norender; window.__norender = false; if (!envRT) refreshEnv(hour); renderFrame(); window.__norender = nr; } return renderer.domElement.toDataURL('image/jpeg', 0.85); },
   };
 }
 boot();
+
+// ===================== UI: main menu, settings, missions list, briefing, objective tracker, flight HUD =====================
+const Settings = Object.assign({ sens: 1, invert: false, blur: true }, store.get('mh-settings') || {});
+function saveSettings() { store.set('mh-settings', Settings); }
+const UI = {
+  brief: null, panel: null,
+  modalOpen() { return !!(this.brief || this.panel || Dialogue.open || Cheats.consoleOpen); },
+  // ---------- briefing ----------
+  showBriefing(def, onAccept, onDecline) {
+    this.brief = { def, onAccept, onDecline };
+    $('brWho').textContent = 'Mission from ' + def.who; $('brTitle').textContent = def.title;
+    $('brText').textContent = def.brief || '';
+    $('brObj').innerHTML = MissionFW.checkpoints(def).map(c => `<li>${c}</li>`).join('');
+    $('brReward').textContent = 'Reward ' + money(def.reward) + (def.rel ? ` · ${(Dialogue.data.contacts[def.rel[0]] || { name: def.rel[0] }).name} will remember this` : '');
+    $('briefing').hidden = false; if (document.pointerLockElement) document.exitPointerLock();
+    Sound.tone(660, 0.1, 'triangle', 0.1); EventBus.emit('ui:briefing', { id: def.id });
+  },
+  closeBriefing(accept) {
+    const b = this.brief; if (!b) return; this.brief = null; $('briefing').hidden = true; canvas.focus();
+    if (accept) b.onAccept && b.onAccept(); else b.onDecline && b.onDecline();
+    if (gameState === 'play') lockPointer();
+  },
+  update() {
+    if (this.brief) { if (hit('Enter') || gpHit(BTN.X)) this.closeBriefing(true); else if (hit('Escape') || hit('Backspace') || gpHit(BTN.O)) this.closeBriefing(false); }
+    else if (this.panel) { if (hit('Escape') || gpHit(BTN.O)) this.closePanel(); }
+    else if (Dialogue.open) Dialogue.update();
+  },
+  // ---------- panels (settings / missions) ----------
+  openPanel(id) {
+    this.closePanel(); this.panel = id; $(id).hidden = false; if (document.pointerLockElement) document.exitPointerLock();
+    if (id === 'settings') this.renderSettings(); if (id === 'missions') this.renderMissions();
+  },
+  closePanel() { if (!this.panel) return; $(this.panel).hidden = true; this.panel = null; },
+  renderSettings() {
+    $('setQuality').textContent = Q.label; $('setTime').textContent = TIME_LABEL[timeMode]; $('setWeather').textContent = Weather.target[0].toUpperCase() + Weather.target.slice(1);
+    $('setSound').textContent = Sound.on ? 'On' : 'Off'; $('setSens').value = Settings.sens; $('setInvert').textContent = Settings.invert ? 'On' : 'Off'; $('setBlur').textContent = Settings.blur ? 'On' : 'Off';
+  },
+  renderMissions() {
+    const done = saveData.done;
+    $('msSummary').textContent = `${done.length} / ${MISSIONS.length} complete`;
+    $('msList').innerHTML = '';
+    for (const m of MISSIONS) {
+      const st = done.includes(m.id) ? 'dn' : m.unlock(done) ? 'av' : 'lk';
+      const d = document.createElement('div'); d.className = st;
+      d.innerHTML = `<span>${m.title}</span><b class="g">${money(m.reward)}</b><small>${m.who} · ${st === 'dn' ? 'Complete' : st === 'av' ? 'Available' : 'Locked'}${m.brief ? ' — ' + m.brief.slice(0, 90) + (m.brief.length > 90 ? '…' : '') : ''}</small>`;
+      if (st === 'av' && gameState === 'play' && m.pos) { const b = document.createElement('button'); b.className = 'ghost'; b.textContent = 'Set GPS'; b.style.cssText = 'grid-column:1/-1;justify-self:start;padding:6px 10px;font-size:14px'; b.onclick = () => { waypoint = [m.pos[0], m.pos[1]]; gps.T = 0; toast('GPS set to ' + m.title); this.closePanel(); if (paused) setPaused(false); }; d.appendChild(b); }
+      $('msList').appendChild(d);
+    }
+  },
+  // ---------- objective tracker ----------
+  tracker() {
+    const el = $('tracker');
+    if (!mission) { if (!el.hidden) el.hidden = true; return; }
+    const def = mission.def, cps = MissionFW.checkpoints(def, true), cur = MissionFW.checkpointIndex(mission);
+    const key_ = def.id + ':' + cur;
+    if (el._k !== key_) {
+      el._k = key_; $('trkTitle').textContent = def.title;
+      $('trkList').innerHTML = cps.map((c, i) => `<li class="${i < cur ? 'done' : i === cur ? 'cur' : ''}">${c}</li>`).join('');
+    }
+    el.hidden = false;
+  },
+  // ---------- flight HUD: attitude, heading tape, speed / altitude, gear, stall ----------
+  flightHud(v) {
+    const cv = $('flighthud'); const show = v && (v.kind === 'plane' || v.kind === 'heli');
+    cv.hidden = !show; if (show) hud.alt.hidden = true; if (!show) return;
+    const c = cv.getContext('2d'), W = cv.width, H = cv.height; c.clearRect(0, 0, W, H);
+    const cx = W / 2, cy = 150, R = 110;
+    // attitude ball
+    c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.clip();
+    c.translate(cx, cy); c.rotate(-v.roll); const py = v.pitch * 160;
+    c.fillStyle = '#2f6fb0'; c.fillRect(-R * 2, -R * 2 + py, R * 4, R * 2); c.fillStyle = '#7a5a30'; c.fillRect(-R * 2, py, R * 4, R * 2);
+    c.strokeStyle = '#fff'; c.lineWidth = 2; c.beginPath(); c.moveTo(-R * 2, py); c.lineTo(R * 2, py); c.stroke();
+    c.font = '600 14px "Barlow Condensed", sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center';
+    for (let d = -30; d <= 30; d += 10) { if (!d) continue; const y = py - d * Math.PI / 180 * 160; c.beginPath(); c.moveTo(-26, y); c.lineTo(26, y); c.stroke(); c.fillText(d, 40, y + 5); }
+    c.restore();
+    c.strokeStyle = '#f6c21c'; c.lineWidth = 4; c.beginPath(); c.moveTo(cx - 60, cy); c.lineTo(cx - 18, cy); c.lineTo(cx - 8, cy + 10); c.moveTo(cx + 60, cy); c.lineTo(cx + 18, cy); c.lineTo(cx + 8, cy + 10); c.stroke();
+    c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.lineWidth = 3; c.strokeStyle = 'rgba(0,0,0,.8)'; c.stroke();
+    // heading tape
+    const hdg = ((180 - v.h * 180 / Math.PI) % 360 + 360) % 360;   // world -z is north, +x east
+    c.fillStyle = 'rgba(0,0,0,.55)'; c.fillRect(cx - 130, 4, 260, 26); c.fillStyle = '#fff'; c.font = '700 15px "Barlow Condensed", sans-serif';
+    for (let d = -40; d <= 40; d += 10) { const a = Math.round((hdg + d) / 10) * 10, x = cx + (a - hdg) * 3; if (x < cx - 125 || x > cx + 125) continue; const lab = ((a % 360) + 360) % 360; c.fillText(lab === 0 ? 'N' : lab === 90 ? 'E' : lab === 180 ? 'S' : lab === 270 ? 'W' : lab, x, 22); }
+    c.fillStyle = '#f6c21c'; c.fillRect(cx - 1, 2, 2, 30);
+    // side readouts
+    const kt = Math.hypot(v.vx, v.vz, v.vy) * 1.944, vs = v.vy;
+    const box = (x, label, val, col = '#fff') => { c.fillStyle = 'rgba(0,0,0,.6)'; c.fillRect(x, 70, 150, 130); c.fillStyle = '#9fb0c0'; c.font = '700 14px "Barlow Condensed", sans-serif'; c.textAlign = 'left'; c.fillText(label, x + 10, 90); c.fillStyle = col; c.font = '400 34px Bungee, Impact, sans-serif'; c.fillText(val, x + 10, 130); };
+    box(10, 'AIRSPEED KT', Math.round(kt), kt * 0.514 < (v.spec.stall || 0) && v.kind === 'plane' ? '#ff5a4a' : '#fff');
+    box(W - 160, 'ALTITUDE M', Math.round(v.y));
+    c.font = '700 16px "Barlow Condensed", sans-serif'; c.fillStyle = vs < -6 ? '#ff5a4a' : '#cfe';
+    c.fillText(`V/S ${vs >= 0 ? '+' : ''}${vs.toFixed(1)} m/s`, W - 150, 160);
+    c.fillStyle = '#cfe'; c.fillText(v.kind === 'plane' ? `THR ${Math.round(v.thr * 100)}%` : `ROTOR ${Math.round(v.rotor * 100)}%`, 20, 160);
+    if (v.kind === 'plane') {
+      c.fillStyle = 'rgba(255,255,255,.2)'; c.fillRect(20, 172, 120, 10); c.fillStyle = '#f6c21c'; c.fillRect(20, 172, 120 * v.thr, 10);
+      c.font = '700 18px "Barlow Condensed", sans-serif'; c.fillStyle = v.gearDown ? '#8ee07a' : '#f6c21c'; c.fillText(v.gearDown ? '▼ GEAR DOWN' : '▲ GEAR UP', W - 150, 190);
+      const stall = !groundedPlane(v) && Math.hypot(v.vx, v.vz, v.vy) < v.spec.stall;
+      if (stall && Math.floor(performance.now() / 300) % 2) { c.textAlign = 'center'; c.fillStyle = '#ff3a2a'; c.font = '400 30px Bungee, Impact, sans-serif'; c.fillText('STALL', cx, 290); }
+      const g = groundHeightAt(v.x, v.z, v.y + 2); if (!stall && v.y - g < 60 && v.vy < -5 && !groundedPlane(v)) { c.textAlign = 'center'; c.fillStyle = '#ff9a2a'; c.font = '400 26px Bungee, Impact, sans-serif'; c.fillText('PULL UP', cx, 290); }
+    }
+  },
+  gearText(v) {
+    if (!v || v.kind !== 'car') return '';
+    const vf = v.fwdSpeed; if (vf < -0.5) return 'R'; if (Math.abs(vf) < 0.5) return 'N';
+    return String(clamp(1 + Math.floor(vf / v.spec.max * 6.2), 1, 6));
+  },
+  // ---------- minimap blips for transport hubs, family home, cafes ----------
+  hubBlips(big) {
+    const out = [];
+    for (const s of services) {
+      if (s.type === 'terminal') out.push({ x: s.x, z: s.z, col: '#ffffff', label: '✈', r: 6, edge: big });
+      else if (s.type === 'metro') out.push({ x: s.x, z: s.z, col: '#2f8fe8', label: 'M', r: 5 });
+      else if (s.type === 'family') out.push({ x: s.x, z: s.z, col: '#ff8ab4', label: 'F', r: 6, edge: true });
+      else if (s.type === 'cafe') out.push({ x: s.x, z: s.z, col: '#c98a4a', label: 'C', r: 4 });
+    }
+    return out;
+  },
+};
+function groundedPlane(v) { return v.y <= groundHeightAt(v.x, v.z, v.y + 1) + 0.1; }
+// ---------- wiring ----------
+$('titleSettingsBtn').onclick = () => UI.openPanel('settings');
+$('titleMissionsBtn').onclick = () => UI.openPanel('missions');
+$('pauseSettingsBtn').onclick = () => UI.openPanel('settings');
+$('pauseMissionsBtn').onclick = () => UI.openPanel('missions');
+$('setClose').onclick = () => UI.closePanel(); $('msClose').onclick = () => UI.closePanel();
+$('setQuality').onclick = () => { qName = QORDER[(QORDER.indexOf(qName) + 1) % 3]; applyQuality(); autoQ.done = true; store.set('mh-quality-set', 1); $('qualityBtn').textContent = 'Graphics: ' + Q.label; UI.renderSettings(); };
+$('setTime').onclick = () => { cycleTime(); UI.renderSettings(); };
+$('setWeather').onclick = () => { const k = Weather.kinds; Weather.set(k[(k.indexOf(Weather.target) + 1) % k.length]); saveData.weather = Weather.target; UI.renderSettings(); };
+$('setSound').onclick = () => { Sound.setOn(!Sound.on); $('soundBtn').textContent = 'Sound: ' + (Sound.on ? 'On' : 'Off'); UI.renderSettings(); };
+$('setSens').oninput = e => { Settings.sens = +e.target.value; saveSettings(); };
+$('setInvert').onclick = () => { Settings.invert = !Settings.invert; saveSettings(); UI.renderSettings(); };
+$('setBlur').onclick = () => { Settings.blur = !Settings.blur; saveSettings(); UI.renderSettings(); };
+$('brAccept').onclick = () => UI.closeBriefing(true); $('brDecline').onclick = () => UI.closeBriefing(false);
+$('exitBtn').onclick = () => { saveGame(true); $('title').hidden = true; $('bye').hidden = false; try { window.close(); } catch (e) { } };
+$('byeBack').onclick = () => { $('bye').hidden = true; $('title').hidden = false; };
+$('quitBtn').onclick = () => { saveGame(true); location.reload(); };
+
+// ===================== LIVING WORLD: data-driven dialogue, relationships, family residence, cafes =====================
+// Dialogue trees are authored in data/dialogue.json and inlined by build.py as DIALOGUE_DATA.
+const Dialogue = {
+  open: false, tree: null, node: null, sel: 0, choices: [], id: '',
+  data: typeof DIALOGUE_DATA !== 'undefined' ? DIALOGUE_DATA : { contacts: {}, trees: {} },
+  rel(who) { return (saveData.rel && saveData.rel[who]) || 0; },
+  addRel(who, d) { saveData.rel = saveData.rel || {}; saveData.rel[who] = clamp(this.rel(who) + d, -100, 100); EventBus.emit('relationship:change', { who, value: saveData.rel[who], delta: d }); },
+  cond(c) {
+    if (!c) return true; const neg = c[0] === '!', s = neg ? c.slice(1) : c; let v = false;
+    if (s.startsWith('done:')) v = saveData.done.includes(s.slice(5));
+    else if (s.startsWith('mission:')) v = !!(mission && mission.def.id === s.slice(8));
+    else if (s.startsWith('rel:')) { const [w, n] = s.slice(4).split('>='); v = this.rel(w) >= +n; }
+    return neg ? !v : v;
+  },
+  // conversation camera: side-on two-shot of the player and whoever they are talking to
+  camera(dt) {
+    const f = this.focus; if (!f) return;
+    const mx = (player.x + f.x) / 2, mz = (player.z + f.z) / 2; let dx = f.x - player.x, dz = f.z - player.z; const l = Math.hypot(dx, dz) || 1; dx /= l; dz /= l;
+    const I = player.interior && INT[player.interior.type];
+    let cx = mx - dz * 2.8 - dx * 0.6, cz = mz + dx * 2.8 - dz * 0.6;
+    if (I) { cx = clamp(cx, I.x - I.W / 2 + 0.5, I.x + I.W / 2 - 0.5); cz = clamp(cz, I.z - I.D / 2 + 0.5, I.z + I.D / 2 - 0.5); }
+    camera.position.lerp(_dlgCam.set(cx, 1.65, cz), 1 - Math.exp(-dt * 6)); camera.lookAt(mx, 1.35, mz);
+    player.h = headingTo(dx, dz); pMesh.root.rotation.y = player.h;
+  },
+  start(id, focus = null) {
+    const T = this.data.trees[id]; if (!T) return false;
+    this.focus = focus;
+    this.id = id; this.tree = T; this.open = true; $('dialogue').hidden = false; if (document.pointerLockElement) document.exitPointerLock();
+    EventBus.emit('dialogue:start', { id }); this.go(T.start); return true;
+  },
+  go(nid) {
+    const n = this.tree.nodes[nid]; if (!n) return this.end();
+    this.node = nid; const C = this.data.contacts[n.who] || { name: n.who };
+    if (n.give) this.give(n.give);
+    if (n.event) EventBus.emit(n.event, { node: nid });
+    $('dlgWho').textContent = C.name + (C.role ? ' · ' + C.role : ''); $('dlgWho').style.color = C.color || '';
+    $('dlgText').textContent = n.text;
+    this.choices = (n.choices || []).filter(ch => this.cond(ch.cond));
+    if (!this.choices.length) this.choices = [{ text: n.end || !n.next ? 'Bye.' : 'Continue', next: n.next, end: n.end || !n.next }];
+    this.sel = 0; this.render(); $('relBar').textContent = `${C.name} ♥ ${this.rel(n.who)}`;
+  },
+  render() {
+    const box = $('dlgChoices'); box.innerHTML = '';
+    this.choices.forEach((ch, i) => { const b = document.createElement('button'); b.className = i === this.sel ? 'sel' : ''; b.textContent = `${i + 1}. ${ch.text}`; b.onclick = () => { this.sel = i; this.choose(); }; b.onmouseenter = () => { this.sel = i; this.render(); }; box.appendChild(b); });
+  },
+  choose() {
+    const ch = this.choices[this.sel]; if (!ch) return;
+    if (ch.rel) for (const w in ch.rel) this.addRel(w, ch.rel[w]);
+    if (ch.give) this.give(ch.give);
+    if (ch.event) EventBus.emit(ch.event, { choice: ch.text });
+    Sound.click();
+    if (ch.end || !ch.next) this.end(); else this.go(ch.next);
+  },
+  give(g) {
+    if (g.cash > 0) addCash(g.cash); else if (g.cash < 0 && !spend(-g.cash)) toast('Not enough cash');
+    if (g.health) player.health = Math.min(100, player.health + g.health);
+  },
+  update() {
+    const up = hit('ArrowUp') || hit('KeyW') || gpHit(BTN.UP), dn = hit('ArrowDown') || hit('KeyS') || gpHit(BTN.DOWN);
+    if (up || dn) { this.sel = (this.sel + (dn ? 1 : -1) + this.choices.length) % this.choices.length; this.render(); Sound.click(); }
+    for (let k = 1; k <= 9; k++) if (hit('Digit' + k) && this.choices[k - 1]) { this.sel = k - 1; this.choose(); return; }
+    if (hit('Enter') || hit('KeyE') || hit('Space') || gpHit(BTN.X)) this.choose();
+    else if (hit('Escape') || gpHit(BTN.O)) this.end();
+  },
+  end() {
+    if (!this.open) return; const id = this.id, node = this.node; this.open = false; camSmoothed = false; $('dialogue').hidden = true; this.tree = null;
+    saveGame(true); EventBus.emit('dialogue:end', { id, node }); if (gameState === 'play') lockPointer();
+  },
+};
+const _dlgCam = new THREE.Vector3();
+// ---------------- family residence + cafes ----------------
+const Living = {
+  family: null, cafes: [],
+  init() {
+    const AMMA_LOOK = { skin: 0x7b4a2e, shirt: 0x9b2335, lower: 0xd8a420, kind: 'saree', female: true, hair: 0x2a2a2a, shoe: 0x3a2a1c, h: 0.92, long: true, accent: 0xd4a72c, build: 1.05 };
+    const KARTHIK_LOOK = { skin: 0x6e4329, shirt: 0x2a6fd2, lower: 0x2b2f3a, kind: 'tee', female: false, hair: 0x141210, shoe: 0xe8e8e8, h: 1.0, long: false, accent: 0xffffff, build: 0.95 };
+    // family home: an old Mylapore house
+    const F = addInterior('family', 18, 14, 3.4, (g, W, D, H, I) => {
+      ibox(g, new THREE.MeshStandardMaterial({ color: 0xb8553c, roughness: 0.8 }), W - 0.2, 0.02, D - 0.2, 0, 0.01, 0);   // red-oxide floor
+      ibox(g, IMAT.fabric, 3.6, 0.5, 1, -5, 0.4, -4.6); ibox(g, IMAT.fabric, 3.6, 0.7, 0.3, -5, 0.8, -5.2);        // sofa
+      ibox(g, IMAT.wood, 2.4, 0.75, 1.2, 4, 0.37, -2); for (const x of [3, 5]) for (const z of [-3.1, -0.9]) ibox(g, IMAT.wood, 0.5, 0.45, 0.5, x, 0.22, z);  // dining
+      ibox(g, IMAT.wood, 1.6, 2.2, 0.5, 7.5, 1.1, -5.5); ibox(g, IMAT.gold, 0.6, 0.6, 0.05, 7.5, 1.6, -5.2);          // pooja shelf
+      ibox(g, new THREE.MeshStandardMaterial({ color: 0xffa040, emissive: 0xff7a10, emissiveIntensity: 2 }), 0.08, 0.15, 0.08, 7.5, 1.35, -5.15);
+      ibox(g, IMAT.dark, 2.4, 1.4, 0.1, -5, 1.6, -6.85);   // TV
+      I.spots = { amma: [-5, -3.6], karthik: [4, -0.6] };
+    }, IMAT.floor, new THREE.MeshStandardMaterial({ color: 0xe8d9a8, roughness: 0.9 }));
+    F.onEnter = () => {
+      this.npcs = [];
+      const a = new Walker(AMMA_LOOK, F.x + F.spots.amma[0], F.z + F.spots.amma[1]); a.state = 'stand'; a.special = true; a.h = 0; this.npcs.push(a);
+      const k = new Walker(KARTHIK_LOOK, F.x + F.spots.karthik[0], F.z + F.spots.karthik[1]); k.state = 'sit'; k.special = true; k.h = Math.PI; k.p.inner.position.y = -0.5; this.npcs.push(k);
+      EventBus.emit('family:enter', {});
+    };
+    F.onExit = () => { for (const w of this.npcs || []) w.remove(); this.npcs = []; };
+    Triggers.add({ id: 'talk:amma', interior: 'family', x: F.x + F.spots.amma[0], z: F.z + F.spots.amma[1] + 1, r: 2.2, prompt: 'Talk to Amma', onUse: () => Dialogue.start('amma', this.npcs && this.npcs[0]) });
+    Triggers.add({ id: 'talk:karthik', interior: 'family', x: F.x + F.spots.karthik[0], z: F.z + F.spots.karthik[1] - 1.5, r: 2, prompt: 'Talk to Karthik', onUse: () => Dialogue.start('karthik', this.npcs && this.npcs[1]) });
+    const [hx, hz] = ll(13.0339, 80.2676); const door = nearestWallDoor(hx, hz, 120);
+    if (door) { this.family = addService('family', door.x, door.z, { h: door.h, name: 'Family home, Mylapore', r: 2 }); const st = streetSpot(door.x, door.z); this.familyCar = st ? { x: st.x + st.tz * st.hw * 0.5, z: st.z - st.tx * st.hw * 0.5, h: st.h } : { x: door.x, z: door.z, h: 0 }; }
+    SERVICE_STYLE.family = { label: 'Family home', icon: 'F', col: '#ff8ab4' };
+    SERVICE_HANDLERS.family = s => enterInterior('family', s);
+    // cafes: a few filter-coffee places on food shops near busy areas
+    const C = addInterior('cafe', 14, 11, 3.4, (g, W, D, H, I) => {
+      ibox(g, IMAT.tile, W - 0.2, 0.02, D - 0.2, 0, 0.01, 0);
+      ibox(g, IMAT.wood, 5, 1.1, 1, -3, 0.55, -3.6); ibox(g, IMAT.metal, 0.6, 0.6, 0.5, -4.5, 1.4, -3.6);
+      I.tables = [[2, 0], [5, 0], [2, 3], [5, 3], [-3, 2]];
+      for (const [x, z] of I.tables) { ibox(g, IMAT.wood, 1.1, 0.75, 1.1, x, 0.37, z); }
+      I.spots = { clerk: [-3, -4.4], counter: [-3, -2.4] };
+    });
+    C.onEnter = () => {
+      this.cafeNpcs = [];
+      for (const [x, z] of C.tables.slice(0, 4)) { const w = new Walker(randomLook(), C.x + x + 0.8, C.z + z); w.state = 'sit'; w.special = true; w.h = -Math.PI / 2; w.p.inner.position.y = -0.5; this.cafeNpcs.push(w); }
+    };
+    C.onExit = () => { for (const w of this.cafeNpcs || []) w.remove(); this.cafeNpcs = []; };
+    Triggers.add({ id: 'talk:selvi', interior: 'cafe', x: C.x + C.spots.counter[0], z: C.z + C.spots.counter[1], r: 2, prompt: 'Order at the counter', onUse: () => Dialogue.start('selvi', interiorNPC) });
+    const foods = spaced(G.shops.filter(s => s.t === 'food'), 2200).slice(0, 10);
+    for (const p of foods) { const d = nearestWallDoor(p.x, p.z); if (d) this.cafes.push(addService('cafe', d.x, d.z, { h: d.h, name: p.n })); }
+    SERVICE_STYLE.cafe = { label: 'Cafe', icon: 'C', col: '#c98a4a' };
+    SERVICE_HANDLERS.cafe = s => enterInterior('cafe', s);
+  },
+};
+Systems.register('living', { init() { Living.init(); } }, 30);
 
 // ===================== MISSIONS =====================
 let mission = null;
@@ -4838,6 +6074,39 @@ const STEP = {
       if (kmh < st.kmh) { st._slow = (st._slow || 0) + dt; if (st._slow > 1.2) { explosion(v.x, v.y + 1, v.z, 2.5); failMission('The bus slowed down. Boom.'); return false; } } else st._slow = 0;
       st._left -= dt; return st._left <= 0;
     },
+  },
+  // event-driven checkpoint: completes when a system raises the named EventBus event (optionally filtered)
+  event: {
+    start(st, M) { st._got = !!(st.pre && st.pre(M)); if (st._off) st._off(); st._off = EventBus.on(st.name, d => { if (!st.match || st.match(d, M)) st._got = true; }); return false; },
+    text: (st, M) => typeof st.text === 'function' ? st.text(M) : st.text,
+    update(st) { return st._got; },
+    target(st, M) { return st.target ? st.target(M) : null; },
+    cleanup(st) { if (st._off) { st._off(); st._off = null; } },
+  },
+  // land a fixed-wing aircraft inside a landing zone and come to a stop
+  landPlane: {
+    text: (st, M) => !player.veh || player.veh.kind !== 'plane' ? 'Get back in the <b>plane</b>' : st.text,
+    update(st, M) {
+      const t = st._t || (st._t = st.to(M)); placeMarker(objMarker, t[0], t[1], st.r * 0.3, 60, 0);
+      const v = player.veh; if (!v || v.kind !== 'plane' || v.wreck) return false;
+      M.extraBlips = [{ x: t[0], z: t[1], col: '#f6c21c', r: 8, edge: true }];
+      return Math.hypot(v.x - t[0], v.z - t[1]) < st.r && groundedPlane(v) && v.speed < 6;
+    },
+    target(st, M) { return st._t || (st._t = st.to(M)); },
+  },
+  // collect an object placed inside an interior (e.g. a drop on a station platform)
+  pickupIn: {
+    start(st, M) { st._got = false; return false; },
+    text: (st, M) => st.text,
+    update(st, M) {
+      const I = INT[st.interior]; if (!I || !player.interior || player.interior.type !== st.interior || (st.where && !st.where(M))) { if (st._m) st._m.visible = false; return false; }
+      if (!st._m) { st._m = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.45, 0.2), new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.4, metalness: 0.3, emissive: 0x2a1a00 })); scene.add(st._m); }
+      const x = I.x + st.at[0], z = I.z + st.at[1]; st._m.visible = true; st._m.position.set(x, 0.75 + Math.sin(performance.now() / 300) * 0.05, z); st._m.rotation.y += 0.02;
+      placeMarker(objMarker, x, z, 0.9, 3, 0);
+      if (Math.hypot(player.x - x, player.z - z) < 1.6) { Sound.pickup(); st._m.visible = false; EventBus.emit('mission:pickup', { id: st.id }); return true; }
+      return false;
+    },
+    cleanup(st) { if (st._m) { scene.remove(st._m); st._m = null; } },
   },
   runwayRace: {
     start(st, M) {
@@ -4984,13 +6253,35 @@ function defineMissions() {
       { t: 'lose' },
     ]
   });
+  defineTransitMissions(near, hd);
   for (const m of MISSIONS) { m.marker = makeMarker(); m.label = labelSprite(m.title.toUpperCase(), m.who); m.label.visible = false; const f = freeSpot(m.at[0], m.at[1]); m.pos = f; }
 }
-function startMission(m) {
-  mission = { def: m, si: -1, timer: null, target: null, targets: [], extraBlips: null };
-  banner(m.title.toUpperCase(), 'Mission from ' + m.who, false, 2.6); Sound.pass();
-  if (rideJob.active) endRideJob();
-  nextStep();
+// ---------------- mission framework: Trigger -> Briefing -> Checkpoints -> Fail / Success -> Reward ----------------
+const CP_SKIP = new Set(['phone', 'give', 'wanted', 'spawn']);
+const CP_DEFAULT = { lose: 'Lose the cops', buyGun: 'Buy a gun', rob: 'Rob the store', hold: 'Hold the vault', destroy: 'Destroy the targets', rings: 'Fly through the rings', keepSpeed: 'Keep the bus moving', runwayRace: 'Win the runway race', stayNear: 'Stay close', collect: 'Collect the crates' };
+const MissionFW = {
+  label(st) { if (st.label) return st.label; const t = typeof st.text === 'function' ? '' : (st.text || ''); return t ? t.replace(/<[^>]+>/g, '').replace(/ Press F.*$/, '') : (CP_DEFAULT[st.t] || st.t); },
+  checkpoints(def) { return def.steps.filter(st => !CP_SKIP.has(st.t)).map(st => this.label(st)); },
+  checkpointIndex(M) { let n = 0; for (let i = 0; i < M.si && i < M.def.steps.length; i++) if (!CP_SKIP.has(M.def.steps[i].t)) n++; return n; },
+  // the briefing text defaults to the contact's first phone message
+  brief(def) { if (def.brief) return def.brief; const ph = def.steps.find(st => st.t === 'phone'); return ph ? ph.msg : ''; },
+};
+function startMission(m, skipBrief = false, via = null) {
+  if (mission) return;
+  m.brief = MissionFW.brief(m);
+  const begin = () => {
+    if (mission) return;
+    mission = { def: m, si: -1, timer: null, target: null, targets: [], extraBlips: null, t0: performance.now(), via };
+    banner(m.title.toUpperCase(), 'Mission from ' + m.who, false, 2.6); Sound.pass();
+    if (rideJob.active) endRideJob();
+    EventBus.emit('mission:start', { id: m.id });
+    nextStep();
+  };
+  if (skipBrief || !gameState || gameState !== 'play') begin(); else UI.showBriefing(m, begin, () => { m._declinedAt = performance.now(); toast('Mission declined'); });
+}
+// event-triggered missions (e.g. accepting a favour in dialogue) start themselves
+function missionTriggers() {
+  for (const m of MISSIONS) if (m.trigger && m.trigger.event) EventBus.on(m.trigger.event, () => { if (!mission && m.unlock(saveData.done) && !saveData.done.includes(m.id)) startMission(m, true, m.trigger.event); });
 }
 function nextStep() {
   const M_ = mission; if (!M_) return;
@@ -4998,6 +6289,7 @@ function nextStep() {
   M_.si++; M_.extraBlips = null; objMarker.visible = false; ringMesh.visible = false;
   if (M_.si >= M_.def.steps.length) return passMission();
   const st = M_.def.steps[M_.si]; st._t = null;
+  if (!CP_SKIP.has(st.t)) EventBus.emit('mission:checkpoint', { id: M_.def.id, index: MissionFW.checkpointIndex(M_), label: MissionFW.label(st) });
   if (st.timer) M_.timer = st.timer; else if (!st.keepTimer && !['phone', 'give', 'wanted', 'spawn'].includes(st.t)) M_.timer = null;
   const h = STEP[st.t]; const done = h.start ? h.start(st, M_) : false;
   if (done) nextStep();
@@ -5015,13 +6307,14 @@ function updateMission(dt) {
       m.label.position.set(m.pos[0], 7 + Math.sin(performance.now() / 500) * 0.3, m.pos[1]);
       if (Math.hypot(player.x - m.pos[0], player.z - m.pos[1]) < 3.5 && !player.dead && !player.veh) near = m;
     }
-    if (near) { prompt(`${key('E', '→')} Start <b>${near.title}</b>`); if (In.act('interact')) startMission(near); }
+    if (near) { prompt(`${key('E', '→')} Start <b>${near.title}</b>`); if (In.act('interact') && !(near._declinedAt && performance.now() - near._declinedAt < 800)) startMission(near); }
     return;
   }
   MISSIONS.forEach(m => { m.marker.visible = false; m.label.visible = false; });
   const M_ = mission, st = M_.def.steps[M_.si]; if (!st) return;
   if (M_.timer !== null) { M_.timer -= dt; if (M_.timer <= 0) return failMission('Out of time.'); }
-  if (M_.target && (M_.target.wreck || M_.target.dead) && !['destroy'].includes(st.t) && M_.si < M_.def.steps.length && ['enter', 'goto', 'land', 'runwayRace', 'collect', 'rings'].includes(st.t) && st.need !== 'any') return failMission('The ' + M_.target.spec.name.toLowerCase() + ' was destroyed.');
+  if (M_.target && (M_.target.wreck || M_.target.dead) && !['destroy'].includes(st.t) && M_.si < M_.def.steps.length && ['enter', 'goto', 'land', 'landPlane', 'runwayRace', 'collect', 'rings'].includes(st.t) && st.need !== 'any') return failMission('The ' + M_.target.spec.name.toLowerCase() + ' was destroyed.');
+  if (M_.def.fail) for (const f of M_.def.fail) if (f.when(M_)) return failMission(f.reason);
   const h = STEP[st.t];
   objMarker.visible = false;
   let done = h.update ? h.update(st, M_, dt) : true;
@@ -5034,7 +6327,11 @@ function passMission() {
   const m = mission.def;
   for (const v of [mission.target, mission.ship, mission.rival, ...(mission.targets || [])]) if (v && !v.dead) { v.mission = false; if (v !== player.veh) v.persist = false; }
   payBank(m.reward); Sound.pass(); rumble(0.4, 0.6, 400);
-  banner('MISSION PASSED', '+' + money(m.reward) + ' to your bank', false, 4.5);
+  if (m.rel) Dialogue.addRel(m.rel[0], m.rel[1]);
+  const secs = Math.round((performance.now() - (mission.t0 || performance.now())) / 1000);
+  banner('MISSION PASSED', '+' + money(m.reward) + ' to your bank' + (m.rel ? ` · ${(Dialogue.data.contacts[m.rel[0]] || { name: m.rel[0] }).name} ♥ +${m.rel[1]}` : '') + ` · ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`, false, 5);
+  for (const st of m.steps) if (STEP[st.t] && STEP[st.t].cleanup) STEP[st.t].cleanup(st);
+  EventBus.emit('mission:passed', { id: m.id, reward: m.reward, secs });
   if (!saveData.done.includes(m.id)) saveData.done.push(m.id);
   const unlocked = MISSIONS.filter(x => !saveData.done.includes(x.id) && x.unlock(saveData.done) && !x._announced);
   unlocked.forEach((x, i) => { x._announced = true; setTimeout(() => phone(x.who, `I have a job for you: "${x.title}". Find my marker on the map.`, 8), 5000 + i * 9000); });
@@ -5047,10 +6344,140 @@ function failMission(reason, silent = false) {
   const st = mission.def.steps[mission.si]; if (st && STEP[st.t] && STEP[st.t].cleanup) STEP[st.t].cleanup(st);
   for (const v of [mission.target, mission.ship, mission.rival, ...(mission.targets || [])]) if (v && !v.dead) { v.mission = false; if (v !== player.veh) { v.persist = false; } }
   if (!silent) { banner('MISSION FAILED', reason, true, 3.5); Sound.fail(); }
+  for (const s2 of mission.def.steps) if (STEP[s2.t] && STEP[s2.t].cleanup) STEP[s2.t].cleanup(s2);
+  EventBus.emit('mission:failed', { id: mission.def.id, reason });
   mission = null; objMarker.visible = false; nextMarker.visible = false; ringMesh.visible = false; setObjective(''); hud.timer.hidden = true;
 }
 function onVehicleDestroyed(v) { }
 function onPedKilled(w) { saveData.stats.kills = (saveData.stats.kills || 0) + 1; }
+
+// ===================== NEW MISSIONS: The Arrival · Commuter Hustle · Family Favor =====================
+function beachLZ() {
+  // the longest stretch of sand (Marina) is the landing zone; fall back to the far end of the runway
+  let best = null, ba = 0;
+  for (const d of WD.areas.beach) { const pts = toPts(d.p); if (pts.length < 3) continue; const a = Math.abs(signedArea(pts)); if (a > ba) { ba = a; best = pts; } }
+  if (!best) { const rw = mainRunway(), e = edgePoint(rw.E, rw.len * 0.8, 1, {}); return [e.x, e.z]; }
+  let [cx, cz] = centroid(best); if (!pointInPoly(cx, cz, best)) [cx, cz] = best[Math.floor(best.length / 2)];
+  return [cx, cz];
+}
+function commuterRoute() {
+  // origin: metro station near home; destination: an elevated station at least 3 km down the line
+  const hp = homeProp(), hx = hp ? hp.door.x : 0, hz = hp ? hp.door.z : 0;
+  const cands = Metro.stations.filter(S => S.svc).sort((a, b) => dist2(a.x, a.z, hx, hz) - dist2(b.x, b.z, hx, hz));
+  for (const S of cands) { const d = Metro.destinations(S).find(o => o.D.elevated && o.km > 3 && o.D.svc); if (d) return { S, D: d.D }; }
+  for (const S of cands) { const d = Metro.destinations(S).find(o => o.D.svc && o.km > 2); if (d) return { S, D: d.D }; }
+  return null;
+}
+function defineTransitMissions(near, hd) {
+  const term = Airport.svc, drop = WorldFix.dropoff;
+  if (term && drop) MISSIONS.push({
+    id: 'm13', title: 'The Arrival', who: 'Priya', at: near(hd.x, hd.z, 50), unlock: () => true, reward: 8000, rel: ['priya', 8],
+    brief: 'Priya at Madras Air has a charter plane nobody is free to fly. Drive to the airport, check in like a regular passenger, clear security, board at Gate 4 — then take the controls yourself and put the plane down on the beach landing zone.',
+    steps: [
+      { t: 'phone', from: 'Priya', msg: 'The charter is fuelled and waiting. Come through the terminal like everyone else, the tower is watching.' },
+      { t: 'enter', need: 'car', text: 'Get a <b>car</b>', label: 'Get a car' },
+      { t: 'goto', need: 'car', stop: true, to: () => [drop.x, drop.z], r: 14, text: 'Drive to the <b>airport departures drop-off</b>', label: 'Drive to the airport drop-off' },
+      { t: 'event', name: 'airport:enter', text: 'Walk into the <b>terminal</b>', label: 'Enter the terminal', target: () => player.interior ? null : [term.x, term.z] },
+      { t: 'event', name: 'airport:ticket', match: d => d.mode === 'charter', text: 'Check in at the <b>Madras Air</b> desk and buy the <b>charter</b>', label: 'Check in for the charter' },
+      { t: 'event', name: 'airport:security', text: 'Walk through <b>security</b>', label: 'Clear security' },
+      { t: 'event', name: 'airport:board', text: 'Board at <b>Gate 4</b>', label: 'Board at the gate' },
+      { t: 'landPlane', to: () => beachLZ(), r: 160, timer: 600, text: 'Take off and land on the <b>beach landing zone</b>', label: 'Fly to the LZ and land' },
+    ],
+    fail: [{ when: M => M.si >= 7 && player.veh && player.veh.kind === 'plane' && player.veh.y > 590, reason: 'You left controlled airspace.' }],
+  });
+  const route = commuterRoute();
+  if (route) MISSIONS.push({
+    id: 'm14', title: 'Commuter Hustle', who: 'Anand', at: [route.S.svc.x + 3, route.S.svc.z + 3], unlock: () => true, reward: 6000, rel: ['anand', 6],
+    brief: `Anand left a briefcase on the platform at ${route.D.name}. Ride the metro like a normal commuter — buy a token, tap in, board — and grab it before someone else does.`,
+    steps: [
+      { t: 'phone', from: 'Anand', msg: `Platform bench, ${route.D.name}. Don't drive, the traffic on that side is murder. Take the metro.` },
+      { t: 'event', name: 'metro:enter', match: d => d.station === route.S.name, text: `Enter <b>${route.S.name}</b> metro station`, label: 'Enter the metro station', target: () => player.interior ? null : [route.S.svc.x, route.S.svc.z] },
+      { t: 'event', name: 'metro:token', match: d => d.to === route.D.name, text: `Buy a token to <b>${route.D.name}</b> at the ticket machine`, label: `Buy a token to ${route.D.name}` },
+      { t: 'event', name: 'metro:gate', text: 'Tap in at the <b>turnstiles</b>', label: 'Tap in at the turnstiles' },
+      { t: 'event', name: 'metro:board', text: 'Wait on the <b>platform</b> and board the train', label: 'Board the train' },
+      { t: 'event', name: 'metro:alight', match: d => d.station === route.D.name, text: `Ride to <b>${route.D.name}</b>${route.D.elevated ? ' (elevated)' : ''} and get off`, label: `Ride to ${route.D.name}` },
+      { t: 'pickupIn', interior: 'metro', at: [14, -6.3], where: () => player.interior.svc && player.interior.svc.station === route.D, text: 'Grab the <b>briefcase</b> from the platform bench', label: 'Retrieve the drop' },
+      { t: 'goto', to: () => [route.D.svc.x, route.D.svc.z], r: 1e9, check: () => !player.interior, text: 'Leave the station', label: 'Leave the station' },
+    ],
+  });
+  const fam = Living.family;
+  if (fam) MISSIONS.push({
+    id: 'm15', title: 'Family Favor', who: 'Amma', trigger: { event: 'family:favor_accepted' }, at: [fam.x + Math.sin(fam.h + Math.PI) * 4, fam.z + Math.cos(fam.h + Math.PI) * 4], unlock: () => true, reward: 5000, rel: ['amma', 10],
+    brief: "Amma called. Something about Appa's car and Uncle Raju's garage. Go home, talk to her, and do what she asks — carefully, it's Appa's pride and joy.",
+    steps: [
+      { t: 'event', name: 'family:enter', pre: () => player.interior && player.interior.type === 'family', text: 'Go inside your <b>family home</b>', label: 'Visit the family home', target: () => player.interior ? null : [fam.x, fam.z] },
+      { t: 'event', name: 'family:favor_accepted', pre: M => M.via === 'family:favor_accepted', text: 'Talk to <b>Amma</b>', label: 'Talk to Amma' },
+      { t: 'spawn', type: 'sedan', color: 0xe8e2d0, at: () => Living.familyCar },
+      { t: 'enter', need: 'target', text: "Get in <b>Appa's Ambassador</b> outside", label: "Get in Appa's car" },
+      { t: 'goto', need: 'target', stop: true, to: () => { const [x, z] = ll(13.0850, 80.2101); const s = roadSpot(x, z, 1, true); return [s.x, s.z]; }, r: 10, timer: 0, text: "Deliver the car to <b>Uncle Raju's garage</b> before he closes", label: "Deliver the car to Uncle Raju" },
+    ],
+    fail: [{ when: M => M.target && M.target.health < M.target.spec.hp * 0.4, reason: "You wrecked Appa's car. Amma is not speaking to you." }],
+  });
+  EventBus.on('airport:pilot', d => { if (mission && mission.def.id === 'm13') mission.target = d.v; });
+  // delivery timer scales with the distance from the family home
+  const m15 = MISSIONS.find(m => m.id === 'm15'); if (m15) { const g = m15.steps[4]; const [x, z] = ll(13.0850, 80.2101); g.timer = Math.round(Math.hypot(x - fam.x, z - fam.z) / 9 + 75); }
+}
+
+// ===================== CHEATS: central registry, type-anywhere codes, console (`) =====================
+// Every cheat goes through the normal game APIs (addCash, Vehicle, Weather.set, Police.set) so the save stays consistent;
+// saves are sanitised before they are written (see sanitizeSave).
+const Cheats = {
+  list: {}, buf: '', consoleOpen: false, used: 0,
+  register(name, help, fn) { this.list[name.toUpperCase()] = { help, fn }; },
+  run(line, src = 'console') {
+    const [cmd, ...args] = String(line).trim().split(/\s+/); const C = this.list[(cmd || '').toUpperCase()];
+    if (!C) return 'Unknown cheat: ' + cmd;
+    if (gameState !== 'play' || player.dead) return 'Cheats work only while playing';
+    let msg; try { msg = C.fn(args) || 'OK'; } catch (e) { console.error(e); return 'Cheat failed: ' + e.message; }
+    this.used++; saveData.stats.cheats = (saveData.stats.cheats || 0) + 1;
+    banner('CHEAT ACTIVATED', cmd.toUpperCase(), false, 1.8); Sound.star();
+    EventBus.emit('cheat', { cmd: cmd.toUpperCase(), args, src }); saveGame(true);
+    return msg;
+  },
+  // type a cheat name during play, GTA style (letters only, no arguments)
+  key(e) {
+    if (gameState !== 'play' || this.consoleOpen || UI.modalOpen() || Menu.open || paused) return;
+    if (e.code === 'Backquote') { e.preventDefault(); this.openConsole(); return; }
+    if (!/^Key[A-Z]$/.test(e.code)) return;
+    this.buf = (this.buf + e.code.slice(3)).slice(-16);
+    for (const name in this.list) if (this.buf.endsWith(name)) { this.buf = ''; this.run(name, 'keys'); break; }
+  },
+  openConsole() { this.consoleOpen = true; $('console').hidden = false; if (document.pointerLockElement) document.exitPointerLock(); keys.clear(); setTimeout(() => $('consoleIn').focus(), 0); },
+  closeConsole() { this.consoleOpen = false; $('console').hidden = true; $('consoleIn').value = ''; $('consoleIn').blur(); canvas.focus(); if (gameState === 'play') lockPointer(); },
+  log(s) { const el = $('consoleLog'); el.textContent += s + '\n'; el.scrollTop = 1e9; },
+  listen() { },
+};
+addEventListener('keydown', e => Cheats.key(e));
+$('consoleIn').addEventListener('keydown', e => {
+  e.stopPropagation();
+  if (e.code === 'Escape' || e.code === 'Backquote') { e.preventDefault(); Cheats.closeConsole(); return; }
+  if (e.code === 'Enter') { const v = e.target.value; e.target.value = ''; if (!v.trim()) return; if (/^help$/i.test(v.trim())) { Cheats.log(Object.entries(Cheats.list).map(([k, c]) => `${k}  ${c.help}`).join('\n')); return; } Cheats.log('> ' + v + '\n' + Cheats.run(v)); }
+});
+Cheats.register('HEALME', 'full health and armor', () => { player.health = 100; player.armor = 100; if (player.veh) player.veh.health = player.veh.spec.hp; return 'Healed'; });
+Cheats.register('GIVECASH', '[amount] add cash (default 10000)', a => { const n = clamp(Math.round(+a[0] || 10000), 1, 10000000); addCash(n); return '+' + money(n); });
+Cheats.register('SPAWNCAR', '[type] spawn a vehicle next to you (default super)', a => {
+  const t = (a[0] || 'super').toLowerCase(); if (!SPECS[t] || SPECS[t].kind !== 'car' && SPECS[t].kind !== 'heli' && SPECS[t].kind !== 'plane') return 'Unknown vehicle: ' + t + ' (try ' + Object.keys(SPECS).filter(k => SPECS[k].kind === 'car').join(', ') + ')';
+  if (player.interior) return 'Go outside first';
+  const s = roadSpot(player.x + Math.sin(player.h) * 6, player.z + Math.cos(player.h) * 6, 1, true);
+  const v = new Vehicle(t, undefined, s.x, s.z, s.h); v.persist = true; v.owned = true; v.fuel = 1; traffic.push(v); return SPECS[t].name + ' delivered';
+});
+Cheats.register('SETWEATHER', '[clear|cloudy|rain|fog|storm] (no argument cycles)', a => { const k = (a[0] || '').toLowerCase(); const next = Weather.kinds.includes(k) ? k : Weather.kinds[(Weather.kinds.indexOf(Weather.target) + 1) % Weather.kinds.length]; Weather.set(next); saveData.weather = next; return 'Weather: ' + next; });
+Cheats.register('CLEARWANTED', 'lose the cops', () => { Police.set(0); return 'Wanted level cleared'; });
+Cheats.register('SKYFALL', 'drop in from 600 m in a jet', () => { if (player.interior) return 'Go outside first'; if (player.veh) exitVehicle(); const v = new Vehicle('jet', 0xf0f0f0, player.x, player.z, player.h); v.y = 600; v.thr = 0.8; v.gearDown = false; v.persist = true; v.owned = true; v.vx = Math.sin(v.h) * 90; v.vz = Math.cos(v.h) * 90; traffic.push(v); enterVehicle(v); return 'Jet at 600 m'; });
+
+// ---------------- save integrity ----------------
+function sanitizeSave(d) {
+  const num = (v, lo, hi, def) => Number.isFinite(+v) ? clamp(+v, lo, hi) : def;
+  d.cash = Math.round(num(d.cash, 0, 1e10, 0)); d.bank = Math.round(num(d.bank, 0, 1e11, 0)); d.hour = num(d.hour, 0, 24, 12.5);
+  for (const k of ['done', 'packages', 'props', 'aircraft', 'boats']) d[k] = Array.isArray(d[k]) ? [...new Set(d[k])] : [];
+  for (const k of ['garages', 'stash', 'locker', 'weapons', 'stats', 'rel']) if (!d[k] || typeof d[k] !== 'object' || Array.isArray(d[k])) d[k] = {};
+  for (const k in d.stash) d.stash[k] = Math.round(num(d.stash[k], 0, 1e11, 0));
+  for (const k in d.rel) d.rel[k] = num(d.rel[k], -100, 100, 0);
+  for (const k in d.weapons) { const w = d.weapons[k]; if (!WEAPONS[k] || !w) { delete d.weapons[k]; continue; } w.clip = Math.round(num(w.clip, 0, 1e5, 0)); w.ammo = Math.round(num(w.ammo, 0, 1e6, 0)); }
+  if (!d.props.length) d.props = ['chetpet']; if (!d.home || !d.props.includes(d.home)) d.home = d.props[0];
+  if (d.weather && !Weather.kinds.includes(d.weather)) d.weather = 'clear';
+  return d;
+}
 
 </script>
 

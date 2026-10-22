@@ -54,6 +54,7 @@ function buildComposer() {
   bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.35, 0.5, 0.92);
   composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
+  composer.addPass(makeGradePass());
   if (Q.post === 2) { smaaPass = new SMAAPass(size.x, size.y); composer.addPass(smaaPass); }
 }
 function renderFrame() { if (composer) composer.render(); else renderer.render(scene, camera); }
@@ -156,11 +157,11 @@ float hh(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 
 };
 
 // ---------- sky ----------
-const skyUniforms = { top: { value: new THREE.Color(0x4f8fd6) }, hor: { value: new THREE.Color(0xd6e6ee) }, sunDir: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color(0xfff2d0) }, night: uNight, time: uTime };
+const skyUniforms = { top: { value: new THREE.Color(0x4f8fd6) }, hor: { value: new THREE.Color(0xd6e6ee) }, sunDir: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color(0xfff2d0) }, night: uNight, time: uTime, cloudy: { value: 0 }, storm: { value: 0 } };
 const skyMat = new THREE.ShaderMaterial({
   uniforms: skyUniforms, side: THREE.BackSide, depthWrite: false, fog: false,
   vertexShader: `varying vec3 vD; void main(){ vD = normalize(position); vec4 p = modelViewMatrix*vec4(position,1.0); gl_Position = projectionMatrix*p; gl_Position.z = gl_Position.w*0.99999; }`,
-  fragmentShader: `uniform vec3 top, hor, sunDir, sunCol; uniform float night, time; varying vec3 vD;
+  fragmentShader: `uniform vec3 top, hor, sunDir, sunCol; uniform float night, time, cloudy, storm; varying vec3 vD;
   float h1(vec3 p){ return fract(sin(dot(p, vec3(12.9898,78.233,45.164)))*43758.5453); }
   float hn(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
   float n2(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(hn(i), hn(i+vec2(1,0)), f.x), mix(hn(i+vec2(0,1)), hn(i+vec2(1,1)), f.x), f.y); }
@@ -169,8 +170,8 @@ const skyMat = new THREE.ShaderMaterial({
    if (d.y < 0.0) c = mix(hor, hor*0.6, clamp(-d.y*4.0,0.0,1.0));
    float s = max(dot(d, sunDir),0.0); c += sunCol*(pow(s,900.0)*4.0 + pow(s,12.0)*0.3 + pow(s,3.0)*0.08);
    if (d.y > 0.0) { vec2 uv = d.xz / (d.y + 0.12) * 1.4 + vec2(time*0.004, time*0.002);
-     float cl = smoothstep(0.52, 0.85, fbm(uv)); cl *= smoothstep(0.0, 0.25, d.y);
-     vec3 cc = mix(vec3(1.0,0.98,0.95), sunCol, 0.35) * (1.0 - night*0.85) + hor*0.25; c = mix(c, cc, cl*0.75); }
+     float cl = smoothstep(0.52 - cloudy * 0.42, 0.85 - cloudy * 0.3, fbm(uv)); cl *= smoothstep(0.0, 0.25, d.y);
+     vec3 cc = mix(vec3(1.0,0.98,0.95), sunCol, 0.35) * (1.0 - night*0.85) * (1.0 - storm * 0.6) + hor*0.25; c = mix(c, cc, cl*(0.75 + cloudy * 0.2)); }
    vec3 g = floor(d*420.0); float st = step(0.9965, h1(g))*night*smoothstep(0.05,0.4,y); c += vec3(st);
    gl_FragColor = vec4(c,1.0); }`
 });
@@ -286,6 +287,7 @@ function addCullable(obj, maxD) {
 // ---------------- spatial lookups ----------------
 const BC = 16, bWallGrid = new Map(), bPolyGrid = new Map();
 let walls = new Float32Array(7 * 262144), nWalls = 0; // flat [ax,az,bx,bz,h,nx,nz] per wall, n = outward normal
+let wallLayer = new Uint8Array(262144);                  // Layers.* per wall (Obstacle for buildings, Curb for platform edges)
 const bPolys = [];
 const gkey = (ix, iz) => (ix + 1000) * 4096 + (iz + 1000);
 function gridAdd(grid, cell, x0, z0, x1, z1, val) {
@@ -295,10 +297,12 @@ function gridAdd(grid, cell, x0, z0, x1, z1, val) {
     const k = gkey(ix, iz); let a = grid.get(k); if (!a) { a = []; grid.set(k, a); } a.push(val);
   }
 }
-function addWallRing(pts, h) {
+function addWallRing(pts, h, layer = Layers.Obstacle, skip = null) {
   const A = signedArea(pts);
   for (let i = 0; i < pts.length; i++) {
     const p = pts[i], q = pts[(i + 1) % pts.length]; const dx = q[0] - p[0], dz = q[1] - p[1], l = Math.hypot(dx, dz); if (l < 0.01) continue;
+    if (skip && skip(p, q)) continue;
+    if (nWalls + 1 > wallLayer.length) { const g = new Uint8Array(wallLayer.length * 2); g.set(wallLayer); wallLayer = g; } wallLayer[nWalls] = layer;
     const nx = A > 0 ? dz / l : -dz / l, nz = A > 0 ? -dx / l : dx / l;
     if ((nWalls + 1) * 7 > walls.length) { const g = new Float32Array(walls.length * 2); g.set(walls); walls = g; } const wi = nWalls++, o = wi * 7; walls[o] = p[0]; walls[o + 1] = p[1]; walls[o + 2] = q[0]; walls[o + 3] = q[1]; walls[o + 4] = h; walls[o + 5] = nx; walls[o + 6] = nz; gridAdd(bWallGrid, BC, p[0], p[1], q[0], q[1], wi);
   }
@@ -311,7 +315,8 @@ function insideBuilding(x, z) {
 const _seen = new Set();
 const colRes = { x: 0, z: 0, nx: 0, nz: 0, hit: false, depth: 0 };
 // one-sided walls: they only push from outside, so nothing can get trapped inside a footprint
-function collideCircle(x, z, r, y = 0) {
+// stepH: walls on the Curb layer no higher than y + stepH are stepped over (people climb onto platforms)
+function collideCircle(x, z, r, y = 0, stepH = 0) {
   colRes.hit = false; colRes.nx = 0; colRes.nz = 0; colRes.depth = 0;
   for (let it = 0; it < 2; it++) {
     const ix0 = Math.floor((x - r) / BC), ix1 = Math.floor((x + r) / BC), iz0 = Math.floor((z - r) / BC), iz1 = Math.floor((z + r) / BC);
@@ -321,6 +326,7 @@ function collideCircle(x, z, r, y = 0) {
       for (const wi of a) {
         if (_seen.has(wi)) continue; _seen.add(wi);
         const wo = wi * 7; if (y > walls[wo + 4] + 0.3) continue;
+        if (stepH > 0 && wallLayer[wi] === Layers.Curb && walls[wo + 4] - y <= stepH) continue;
         const ax = walls[wo + 0], az = walls[wo + 1], dx = walls[wo + 2] - ax, dz = walls[wo + 3] - az;
         if ((x - ax) * walls[wo + 5] + (z - az) * walls[wo + 6] < 0) continue;
         const L2 = dx * dx + dz * dz; let t = L2 > 0 ? ((x - ax) * dx + (z - az) * dz) / L2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
@@ -407,6 +413,10 @@ function surfaceAt(x, z, curY) {
   }
   return surfRes;
 }
+// raised walkable surfaces (station platforms): height lookup for people on foot
+const walkPolys = [], walkGrid = new Map();
+function addWalkSurface(pts, h) { let minx = 1e9, maxx = -1e9, minz = 1e9, maxz = -1e9; for (const p of pts) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); minz = Math.min(minz, p[1]); maxz = Math.max(maxz, p[1]); } const i = walkPolys.length; walkPolys.push({ pts, h, minx, maxx, minz, maxz }); gridAdd(walkGrid, 40, minx, minz, maxx, maxz, i); }
+function walkSurfaceAt(x, z) { const a = walkGrid.get(gkey(Math.floor(x / 40), Math.floor(z / 40))); if (!a) return 0; for (const i of a) { const w = walkPolys[i]; if (x >= w.minx && x <= w.maxx && z >= w.minz && z <= w.maxz && pointInPoly(x, z, w.pts)) return w.h; } return 0; }
 const WC = 60, waterGrid = new Map(); const waterPolys = [];
 function inWater(x, z) {
   const a = waterGrid.get(gkey(Math.floor(x / WC), Math.floor(z / WC))); if (!a) return false;

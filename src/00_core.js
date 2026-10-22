@@ -29,8 +29,9 @@ const pressed = new Set();
 const mouse = { dx: 0, dy: 0, down: false, right: false, clicked: false, lastMove: 0, wheel: 0 };
 const GAME_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab']);
 let inputEnabled = false;
+const typing = e => e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
 addEventListener('keydown', e => {
-  if (!inputEnabled) return;
+  if (!inputEnabled || typing(e)) return;
   if (GAME_KEYS.has(e.code)) e.preventDefault();
   if (!keys.has(e.code)) pressed.add(e.code);
   keys.add(e.code);
@@ -122,6 +123,7 @@ const In = {
       case 'rides': return hit('KeyT') || gpHit(BTN.DOWN);
       case 'flip': return hit('KeyR') || gpHit(BTN.O);
       case 'phone': return hit('KeyI') || gpHit(BTN.SHARE);
+      case 'gear': return hit('KeyG') || gpHit(BTN.L3);
     }
     return false;
   },
