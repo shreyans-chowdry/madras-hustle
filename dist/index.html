@@ -841,11 +841,19 @@ const Assets = {
   VEHICLE: { airliner: 'airliner', plane: 'plane', heli: 'heli', policeheli: 'heli', super: 'car_super' },
   async load(onProgress) {
     const loader = new GLTFLoader(); let n = 0;
+    const done = (name, g) => {
+      g.scene.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material) o.material.envMapIntensity = 1.2; } });
+      this.gltf[name] = g.scene;
+    };
+    // hosts that refuse binary files get the same GLB as base64 inside assets/<name>.glb.json (written by build.py)
+    const viaJson = name => fetch('assets/' + name + '.glb.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(j => {
+      const bin = atob(j.glb), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      return new Promise((ok, bad) => loader.parse(buf.buffer, 'assets/', ok, bad));
+    });
     await Promise.all(this.files.map(name => new Promise(res => {
-      loader.load('assets/' + name + '.glb', g => {
-        g.scene.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material) o.material.envMapIntensity = 1.2; } });
-        this.gltf[name] = g.scene; n++; if (onProgress) onProgress(n / this.files.length); res();
-      }, undefined, err => { console.warn('asset ' + name + ' not loaded, using procedural fallback', err && err.message); n++; res(); });
+      const fin = () => { n++; if (onProgress) onProgress(n / this.files.length); res(); };
+      loader.load('assets/' + name + '.glb', g => { done(name, g); fin(); },
+        undefined, () => viaJson(name).then(g => { done(name, g); fin(); }).catch(err => { console.warn('asset ' + name + ' not loaded, using procedural fallback', err && err.message); fin(); }));
     })));
     this.loaded = true;
     EventBus.emit('assets:loaded', { count: Object.keys(this.gltf).length });
