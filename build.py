@@ -17,4 +17,8 @@ open(os.path.join(root, 'artifact.html'), 'w').write(html)       # body-only ver
 for f in ('world-a.json', 'world-b.json'):
     src = os.path.join(root, 'data', f)
     if os.path.exists(src): shutil.copy(src, os.path.join(dist, f))
+# base64 copies of the Blender models for hosts that only serve text files (the game falls back to these)
+import base64
+for f in glob.glob(os.path.join(dist, 'assets', '*.glb')):
+    open(f + '.json', 'w').write(json.dumps({'glb': base64.b64encode(open(f, 'rb').read()).decode()}))
 print('built dist/index.html', round(len(html) / 1e3), 'KB')
